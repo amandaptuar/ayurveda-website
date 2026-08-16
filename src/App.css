@@ -1,0 +1,37 @@
+.app {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+.whatsapp-float {
+  position: fixed;
+  bottom: 25px;
+  left: 25px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+  filter: drop-shadow(2px 2px 8px rgba(0,0,0,0.25));
+}
+
+.whatsapp-float:hover {
+  transform: scale(1.1);
+}
+
+.whatsapp-icon {
+  width: 55px;
+  height: 55px;
+}
+
+/* Hide on desktop, only show on mobile as requested */
+@media (min-width: 769px) {
+  .whatsapp-float {
+    display: none;
+  }
+}

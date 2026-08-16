@@ -1,0 +1,97 @@
+.hero-banner {
+  position: relative;
+  background: var(--color-bg-beige);
+  padding: 20px 0 0 0; /* Space at top, dots will sit at the bottom */
+}
+
+.hero-slider {
+  position: relative;
+  width: 100%;
+}
+
+.hero-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+  pointer-events: none;
+}
+
+.hero-slide.active {
+  opacity: 1;
+  pointer-events: all;
+  position: relative;
+}
+
+.hero-slide-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+.hero-full-image {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 21 / 9; /* Widescreen aspect ratio for desktop */
+  object-fit: cover;
+  border-radius: 20px;
+  display: block;
+}
+
+/* Dots positioned bottom right of the container */
+.hero-dots-container {
+  position: relative;
+  height: 40px; /* Space for dots to sit under the image */
+}
+
+.hero-dots {
+  display: flex;
+  justify-content: flex-end; /* Align dots to the right */
+  gap: 8px;
+  position: absolute;
+  right: var(--container-padding);
+  top: 15px; /* Adjust to align visually with StatsBar */
+}
+
+.hero-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c0c0c0;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.hero-dot.active {
+  background: var(--color-primary-dark-green);
+  width: 8px;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .hero-banner {
+    padding: 10px 0 0 0;
+  }
+  .hero-slide-inner {
+    padding: 0 16px; /* Add side spacing back */
+  }
+  .hero-full-image {
+    border-radius: 16px; /* Rounded corners on mobile too */
+    aspect-ratio: 4 / 5; /* Taller on mobile */
+  }
+  .hero-dots {
+    justify-content: center;
+    right: 0;
+    left: 0;
+    top: -25px; /* Pull up over the image on mobile */
+  }
+  .hero-dot {
+    background: rgba(255, 255, 255, 0.5);
+  }
+  .hero-dot.active {
+    background: white;
+  }
+}

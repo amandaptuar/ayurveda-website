@@ -1,0 +1,39 @@
+.video-section {
+  padding: 20px 0 50px;
+  background: var(--color-bg-off-white);
+}
+
+.video-wrapper {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.video-placeholder {
+  width: 100%;
+  height: 450px;
+  position: relative;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, #c8d6c0 0%, #a8c098 50%, #88a878 100%);
+}
+
+.video-play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 2;
+  transition: transform var(--transition-base);
+}
+
+.video-play-btn:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .video-placeholder {
+    height: 250px;
+  }
+}

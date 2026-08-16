@@ -1,0 +1,19 @@
+.top-bar {
+  background-color: var(--color-primary-dark-green);
+  padding: 8px 0;
+  text-align: center;
+}
+
+.top-bar-text {
+  color: var(--color-text-white);
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 768px) {
+  .top-bar-text {
+    font-size: 0.7rem;
+    padding: 0 10px;
+  }
+}

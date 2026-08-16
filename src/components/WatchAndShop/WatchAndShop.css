@@ -1,0 +1,143 @@
+.watch-shop {
+  padding: 50px 0;
+  background: var(--color-bg-white);
+}
+
+.watch-shop-title {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 30px;
+}
+
+.watch-shop-wrapper {
+  position: relative;
+}
+
+.watch-shop-scroll {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 4px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.watch-shop-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+
+
+.watch-card {
+  flex: 0 0 280px;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-base);
+}
+
+.watch-card:hover {
+  transform: translateY(-4px);
+}
+
+.watch-video {
+  width: 280px;
+  height: 420px;
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.watch-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.watch-views {
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.watch-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.watch-action-btn {
+  background: transparent;
+  color: white;
+  font-size: 1rem;
+  padding: 0;
+}
+
+.watch-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0 8px;
+}
+
+.watch-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.watch-product-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.watch-price {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.watch-buy-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--color-primary-dark-green);
+  color: white;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.watch-buy-btn:hover {
+  background: var(--color-primary-green);
+}
+
+@media (max-width: 768px) {
+  .watch-shop {
+    padding: 35px 0;
+  }
+
+  .watch-shop-title {
+    font-size: 1.4rem;
+  }
+
+  .watch-card {
+    flex: 0 0 220px;
+  }
+
+  .watch-video {
+    width: 220px;
+    height: 330px;
+  }
+
+}

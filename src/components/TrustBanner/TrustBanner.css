@@ -1,0 +1,59 @@
+.trust-banner {
+  background: var(--color-primary-dark-green);
+  padding: 14px 0;
+  overflow: hidden;
+}
+
+.trust-marquee {
+  overflow: hidden;
+  position: relative;
+}
+
+.trust-marquee-inner {
+  display: flex;
+  gap: 50px;
+  animation: marquee 30s linear infinite;
+  width: max-content;
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.trust-icon {
+  font-size: 1.4rem;
+}
+
+.trust-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.trust-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-white);
+}
+
+.trust-subtitle {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 768px) {
+  .trust-banner {
+    padding: 10px 0;
+  }
+
+  .trust-title {
+    font-size: 0.75rem;
+  }
+
+  .trust-subtitle {
+    font-size: 0.65rem;
+  }
+}
