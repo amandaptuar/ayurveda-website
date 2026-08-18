@@ -100,7 +100,7 @@ const Product = () => {
       <div className="product-container">
         {/* Left Column - Image Gallery */}
         <div className="product-gallery">
-          <div className="main-image-placeholder" style={activeImageUrl ? { backgroundImage: `url(${activeImageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center', transition: 'background-image 0.3s ease-in-out' } : {}}>
+          <div className="main-image-placeholder" style={activeImageUrl ? { backgroundImage: `url(${activeImageUrl})`, backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center', transition: 'background-image 0.3s ease-in-out' } : {}}>
             {!activeImageUrl && (
               <>
                 <span className="placeholder-icon">📦</span>
@@ -322,9 +322,9 @@ const Product = () => {
             {relatedProducts.map((relatedProduct) => (
               <Link to={`/products/${relatedProduct.id}`} key={relatedProduct.id} style={{ textDecoration: 'none', color: 'inherit' }}>
                 <div className="product-card">
-                  <div className="product-image-container">
+                  <div className="product-image-container" style={{backgroundColor: '#fff'}}>
                     {relatedProduct.image_url ? (
-                      <img src={relatedProduct.image_url} alt={relatedProduct.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                      <img src={relatedProduct.image_url} alt={relatedProduct.name} style={{width: '100%', height: '100%', objectFit: 'contain'}} />
                     ) : (
                       <div className="placeholder-image">
                         <span className="placeholder-icon">📦</span>
