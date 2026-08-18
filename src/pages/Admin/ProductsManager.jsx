@@ -8,6 +8,13 @@ const ProductsManager = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Image handling state
+  const [mainImageFile, setMainImageFile] = useState(null);
+  const [mainImagePreview, setMainImagePreview] = useState('');
+  const [additionalFiles, setAdditionalFiles] = useState([]);
+  const [additionalPreviews, setAdditionalPreviews] = useState([]);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -63,6 +70,10 @@ const ProductsManager = () => {
         benefits: product.benefits?.length ? product.benefits : [''],
         sizes: product.sizes?.length ? product.sizes : [{ name: '', price: '', original_price: '', volume: '', saveText: '' }]
       });
+      setMainImageFile(null);
+      setMainImagePreview(product.image_url || '');
+      setAdditionalFiles(new Array(product.additional_images?.length || 0).fill(null));
+      setAdditionalPreviews(product.additional_images || []);
     } else {
       setEditingProduct(null);
       setFormData({
@@ -79,6 +90,10 @@ const ProductsManager = () => {
         benefits: [''],
         sizes: [{ name: 'Starter Pack', price: '', original_price: '', volume: '1000 ml x 1', saveText: 'Save ₹0' }]
       });
+      setMainImageFile(null);
+      setMainImagePreview('');
+      setAdditionalFiles([]);
+      setAdditionalPreviews([]);
     }
     setIsModalOpen(true);
   };
@@ -129,13 +144,52 @@ const ProductsManager = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    
+    // Toast loading state
+    const loadingToastId = toast.loading(editingProduct ? 'Updating product...' : 'Creating product...');
+
     try {
+      // 1. Upload Main Image if a new file is selected
+      let finalImageUrl = formData.image_url;
+      if (mainImageFile) {
+        const fileExt = mainImageFile.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `${fileName}`;
+        
+        const { error: uploadError } = await supabase.storage.from('product-images').upload(filePath, mainImageFile);
+        if (uploadError) throw uploadError;
+        
+        const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(filePath);
+        finalImageUrl = publicUrl;
+      }
+
+      // 2. Upload Additional Images
+      let finalAdditionalImages = [];
+      for (let i = 0; i < additionalPreviews.length; i++) {
+        if (additionalFiles[i]) {
+          const fileExt = additionalFiles[i].name.split('.').pop();
+          const fileName = `${Math.random()}.${fileExt}`;
+          const filePath = `${fileName}`;
+          
+          const { error: uploadError } = await supabase.storage.from('product-images').upload(filePath, additionalFiles[i]);
+          if (uploadError) throw uploadError;
+          
+          const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(filePath);
+          finalAdditionalImages.push(publicUrl);
+        } else if (additionalPreviews[i] && additionalPreviews[i].startsWith('http')) {
+          // Keep existing valid URL
+          finalAdditionalImages.push(additionalPreviews[i]);
+        }
+      }
+
       // Clean up empty strings in arrays
       const cleanedData = {
         ...formData,
+        image_url: finalImageUrl,
+        additional_images: finalAdditionalImages,
         original_price: formData.original_price || null,
         benefits: formData.benefits.filter(b => typeof b === 'string' && b.trim() !== ''),
-        additional_images: formData.additional_images.filter(img => typeof img === 'string' && img.trim() !== ''),
         sizes: formData.sizes.filter(s => s.name.trim() !== '')
       };
 
@@ -145,19 +199,21 @@ const ProductsManager = () => {
           .update(cleanedData)
           .eq('id', editingProduct.id);
         if (error) throw error;
-        toast.success('Product updated successfully');
+        toast.success('Product updated successfully', { id: loadingToastId });
       } else {
         const { error } = await supabase
           .from('products')
           .insert([cleanedData]);
         if (error) throw error;
-        toast.success('Product created successfully');
+        toast.success('Product created successfully', { id: loadingToastId });
       }
       handleCloseModal();
       fetchProducts();
     } catch (error) {
-      toast.error('Error saving product. Check if additional_images column exists in Supabase.');
+      toast.error(error.message || 'Error saving product.', { id: loadingToastId });
       console.error(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -321,33 +377,71 @@ const ProductsManager = () => {
                 </div>
 
                 <div className="admin-form-group" style={{marginBottom: 0}}>
-                  <label className="admin-label">Main Image URL</label>
-                  <input type="url" className="admin-input" value={formData.image_url} onChange={(e) => setFormData({...formData, image_url: e.target.value})} placeholder="https://..." />
+                  <label className="admin-label">Main Image</label>
+                  <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                    {mainImagePreview ? (
+                      <img src={mainImagePreview} alt="Preview" style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--admin-border)' }} />
+                    ) : (
+                      <div style={{ width: '64px', height: '64px', backgroundColor: '#e2e8f0', borderRadius: '8px', border: '1px solid var(--admin-border)' }}></div>
+                    )}
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      className="admin-input" 
+                      onChange={(e) => {
+                        if (e.target.files[0]) {
+                          setMainImageFile(e.target.files[0]);
+                          setMainImagePreview(URL.createObjectURL(e.target.files[0]));
+                        }
+                      }} 
+                    />
+                  </div>
                 </div>
 
                 {/* Additional Images */}
                 <div className="dynamic-list-container">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                     <label className="admin-label" style={{marginBottom: 0}}>Additional Images (Up to 4)</label>
-                    <button type="button" onClick={() => addToList('additional_images')} className="admin-btn secondary" style={{padding: '6px 12px', fontSize: '0.8rem'}}>
+                    <button type="button" onClick={() => {
+                      if (additionalPreviews.length >= 4) return toast.error('Maximum 4 additional images allowed');
+                      setAdditionalPreviews([...additionalPreviews, '']);
+                      setAdditionalFiles([...additionalFiles, null]);
+                    }} className="admin-btn secondary" style={{padding: '6px 12px', fontSize: '0.8rem'}}>
                       <PlusCircle size={14} /> Add Image
                     </button>
                   </div>
-                  {formData.additional_images.map((imgUrl, index) => (
-                    <div key={index} className="dynamic-list-item">
+                  {additionalPreviews.map((previewUrl, index) => (
+                    <div key={index} className="dynamic-list-item" style={{alignItems: 'center'}}>
+                      {previewUrl ? (
+                        <img src={previewUrl} alt="Preview" style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--admin-border)' }} />
+                      ) : (
+                        <div style={{ width: '48px', height: '48px', backgroundColor: '#e2e8f0', borderRadius: '4px', border: '1px solid var(--admin-border)' }}></div>
+                      )}
                       <input 
-                        type="url" 
+                        type="file" 
+                        accept="image/*"
                         className="admin-input" 
-                        value={imgUrl} 
-                        onChange={(e) => handleListChange('additional_images', index, e.target.value)} 
-                        placeholder="https://... image URL"
+                        onChange={(e) => {
+                          if (e.target.files[0]) {
+                            const newFiles = [...additionalFiles];
+                            newFiles[index] = e.target.files[0];
+                            setAdditionalFiles(newFiles);
+
+                            const newPreviews = [...additionalPreviews];
+                            newPreviews[index] = URL.createObjectURL(e.target.files[0]);
+                            setAdditionalPreviews(newPreviews);
+                          }
+                        }} 
                       />
-                      <button type="button" onClick={() => removeFromList('additional_images', index)} className="btn-icon-only" style={{color: 'var(--admin-danger)'}}>
+                      <button type="button" onClick={() => {
+                        setAdditionalPreviews(additionalPreviews.filter((_, i) => i !== index));
+                        setAdditionalFiles(additionalFiles.filter((_, i) => i !== index));
+                      }} className="btn-icon-only" style={{color: 'var(--admin-danger)'}}>
                         <MinusCircle size={20} />
                       </button>
                     </div>
                   ))}
-                  {formData.additional_images.length === 0 && (
+                  {additionalPreviews.length === 0 && (
                     <div style={{ fontSize: '0.85rem', color: '#64748b' }}>No additional images. Click "Add Image" to include gallery images.</div>
                   )}
                 </div>
@@ -407,9 +501,9 @@ const ProductsManager = () => {
             </div>
 
             <div className="admin-modal-footer">
-              <button type="button" className="admin-btn secondary" onClick={handleCloseModal}>Cancel</button>
-              <button type="submit" form="productForm" className="admin-btn">
-                {editingProduct ? 'Update Product' : 'Create Product'}
+              <button type="button" className="admin-btn secondary" onClick={handleCloseModal} disabled={isSubmitting}>Cancel</button>
+              <button type="submit" form="productForm" className="admin-btn" disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : (editingProduct ? 'Update Product' : 'Create Product')}
               </button>
             </div>
           </div>
