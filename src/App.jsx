@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Routes, Route, Outlet, useLocation } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
 import './App.css'
 import TopBar from './components/TopBar/TopBar'
 import Header from './components/Header/Header'
@@ -78,6 +79,13 @@ function App() {
 
   return (
     <div className="app">
+      <Toaster 
+        position="top-center" 
+        toastOptions={{ 
+          style: { zIndex: 999999 } 
+        }} 
+      />
+      
       {/* Route Transition Loader */}
       {isTransitioning && (
         <div className="global-loader" style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
