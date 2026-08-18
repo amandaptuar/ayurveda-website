@@ -7,7 +7,6 @@ import TrustBanner from '../../components/TrustBanner/TrustBanner'
 import ShopByConcern from '../../components/ShopByConcern/ShopByConcern'
 import WatchAndShop from '../../components/WatchAndShop/WatchAndShop'
 import Bestsellers from '../../components/Bestsellers/Bestsellers'
-import ShopByCategories from '../../components/ShopByCategories/ShopByCategories'
 import ComboDeals from '../../components/ComboDeals/ComboDeals'
 import Testimonials from '../../components/Testimonials/Testimonials'
 import Blogs from '../../components/Blogs/Blogs'
@@ -27,7 +26,6 @@ const Home = () => {
       <ShopByConcern />
       <WatchAndShop />
       <Bestsellers />
-      <ShopByCategories />
       <ComboDeals />
       <Testimonials />
       <Blogs />

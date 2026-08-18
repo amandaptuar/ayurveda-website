@@ -80,7 +80,8 @@
   }
   .hero-full-image {
     border-radius: 16px; /* Rounded corners on mobile too */
-    aspect-ratio: 4 / 5; /* Taller on mobile */
+    aspect-ratio: auto; /* Let the image scale naturally so it doesn't crop */
+    height: auto;
   }
   .hero-dots {
     justify-content: center;

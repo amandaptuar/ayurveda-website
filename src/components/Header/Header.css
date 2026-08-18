@@ -255,4 +255,13 @@
   .mobile-nav {
     display: flex;
   }
+
+  .hide-on-mobile {
+    display: none;
+  }
+
+  .login-btn-header {
+    padding: 6px 10px !important;
+    font-size: 0.8rem !important;
+  }
 }
