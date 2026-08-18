@@ -13,8 +13,9 @@ const Product = () => {
   const [quantity, setQuantity] = useState(1)
   const [selectedSizeIndex, setSelectedSizeIndex] = useState(0) // Default to first size if exists
   const [activeImageIndex, setActiveImageIndex] = useState(0)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
   
-  const { addToCart } = useCart()
+  const { addToCart, cartItems } = useCart()
 
   useEffect(() => {
     if (id) {
@@ -89,6 +90,8 @@ const Product = () => {
   // Build image gallery array
   const allImages = [product.image_url, ...(product.additional_images || [])].filter(Boolean);
   const activeImageUrl = allImages.length > 0 ? allImages[activeImageIndex] : null;
+
+  const isAddedToCart = cartItems?.some(item => item.product_id === product.id);
 
   return (
     <div className="product-page">
@@ -235,8 +238,8 @@ const Product = () => {
           </div>
 
           <div className="action-buttons" style={{marginTop: '16px'}}>
-            <button className="btn-add-to-cart" onClick={handleAddToCart} style={{width: '100%', border: '1px solid var(--color-primary-green)', background: 'white', color: 'var(--color-primary-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '12px'}}>
-              <span className="btn-icon">🛒</span> ADD TO CART
+            <button className="btn-add-to-cart" onClick={handleAddToCart} disabled={isAddedToCart} style={{width: '100%', border: isAddedToCart ? 'none' : '1px solid var(--color-primary-green)', background: isAddedToCart ? '#f5b041' : 'white', color: isAddedToCart ? 'white' : 'var(--color-primary-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '12px', cursor: isAddedToCart ? 'not-allowed' : 'pointer'}}>
+              <span className="btn-icon">{isAddedToCart ? '✅' : '🛒'}</span> {isAddedToCart ? 'ADDED TO CART' : 'ADD TO CART'}
             </button>
             <button className="btn-buy-now" onClick={() => { handleAddToCart(); /* add routing to checkout later if needed */ }} style={{width: '100%', background: 'var(--color-primary-green)', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '16px'}}>
               BUY IT NOW
@@ -297,18 +300,6 @@ const Product = () => {
                 {product.description || "Experience the pure essence of Ayurveda with this highly effective natural formula. Expertly crafted to support your daily wellness journey using ethically sourced herbs."}
               </div>
             </div>
-            <div className="accordion-item">
-              <div className="accordion-header">
-                Key Ingredients
-                <span>+</span>
-              </div>
-            </div>
-            <div className="accordion-item">
-              <div className="accordion-header">
-                How to Use
-                <span>+</span>
-              </div>
-            </div>
           </div>
 
         </div>
@@ -319,7 +310,9 @@ const Product = () => {
         <div className="related-products-section">
           <h2 className="related-products-title">You May Also Like...</h2>
           <div className="related-products-grid">
-            {relatedProducts.map((relatedProduct) => (
+            {relatedProducts.map((relatedProduct) => {
+              const isRelatedAddedToCart = cartItems?.some(item => item.product_id === relatedProduct.id);
+              return (
               <Link to={`/products/${relatedProduct.id}`} key={relatedProduct.id} style={{ textDecoration: 'none', color: 'inherit' }}>
                 <div className="product-card">
                   <div className="product-image-container" style={{backgroundColor: '#fff'}}>
@@ -339,10 +332,35 @@ const Product = () => {
                       ₹{relatedProduct.price}
                       {relatedProduct.original_price && <span className="original-price" style={{marginLeft: '8px', textDecoration: 'line-through', color: 'var(--color-text-muted)'}}>₹{relatedProduct.original_price}</span>}
                     </div>
+                    <button 
+                      className="btn-add-cart"
+                      disabled={isRelatedAddedToCart}
+                      onClick={(e) => {
+                        if (isRelatedAddedToCart) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const sizeData = relatedProduct.sizes && relatedProduct.sizes.length > 0 ? relatedProduct.sizes[0] : null;
+                        addToCart(relatedProduct.id, 1, sizeData);
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        marginTop: '12px',
+                        borderRadius: '8px',
+                        backgroundColor: isRelatedAddedToCart ? '#f5b041' : 'var(--color-primary-green)',
+                        color: 'white',
+                        border: 'none',
+                        fontWeight: '600',
+                        cursor: isRelatedAddedToCart ? 'not-allowed' : 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {isRelatedAddedToCart ? '✓ Added to cart' : 'Add to cart'}
+                    </button>
                   </div>
                 </div>
               </Link>
-            ))}
+            )})}
           </div>
         </div>
       )}

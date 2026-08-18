@@ -86,10 +86,13 @@ const Checkout = () => {
         console.warn('Could not save address to history', addressError)
       }
 
-      // 2. Create the order
+      // 2. Create the order with a unique order ID
+      const newOrderId = `ORD-${Math.floor(Math.random() * 900000) + 100000}-${Date.now().toString().slice(-4)}`
+      
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert([{ 
+          id: newOrderId,
           user_id: user.id, 
           total_amount: total,
           customer_name: addressData.full_name,

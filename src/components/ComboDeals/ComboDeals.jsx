@@ -7,7 +7,7 @@ import './ComboDeals.css'
 const ComboDeals = () => {
   const [combos, setCombos] = useState([])
   const [loading, setLoading] = useState(true)
-  const { addToCart } = useCart()
+  const { addToCart, cartItems } = useCart()
 
   useEffect(() => {
     fetchCombos()
@@ -54,39 +54,68 @@ const ComboDeals = () => {
             <p>Check back later or browse our admin panel to add some.</p>
           </div>
         ) : (
-          <div className="combo-grid">
-            {combos.map((combo) => (
-              <div key={combo.id} className="combo-card">
-                <Link to={`/products/${combo.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: '16px' }}>
-                  <div className="combo-image placeholder-image" style={combo.image_url ? { backgroundImage: `url(${combo.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center', width: 100, height: 100, borderRadius: 12, flexShrink: 0 } : { width: 100, height: 100, borderRadius: 12, flexShrink: 0, backgroundColor: '#e2e8f0' }}>
-                    {!combo.image_url && <div className="placeholder-text" style={{ fontSize: '0.8rem' }}>📦</div>}
-                  </div>
-                  <div className="combo-info">
-                    {combo.original_price && combo.price < combo.original_price && (
-                      <span className="combo-save">SAVE ₹{Number(combo.original_price - combo.price).toFixed(2)}</span>
+          <div className="combo-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+            {combos.map((combo) => {
+              const isAddedToCart = cartItems?.some(item => item.product_id === combo.id);
+              return (
+              <div className="product-card" key={combo.id}>
+                <Link to={`/products/${combo.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <div className="product-image-container">
+                    <span className="badge-bestseller" style={{ backgroundColor: 'var(--color-accent-orange)' }}>✦ Combo Deal</span>
+                    {combo.image_url ? (
+                      <img src={combo.image_url} alt={combo.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                    ) : (
+                      <div className="placeholder-image">
+                        <span className="placeholder-icon">📦</span>
+                        <span className="placeholder-text">{combo.name}</span>
+                      </div>
                     )}
-                    <h3 className="combo-title" style={{ fontSize: '1.1rem', marginBottom: '8px' }}>{combo.name}</h3>
-                    {combo.description && <p className="combo-desc" style={{ fontSize: '0.9rem', color: '#64748b' }}>{combo.description.substring(0, 60)}...</p>}
-                    <div className="price-group" style={{ marginTop: 'auto', paddingTop: '8px' }}>
-                      <span className="price-current">₹{Number(combo.price).toFixed(2)}</span>
-                      {combo.original_price && <span className="price-original" style={{ textDecoration: 'line-through', color: '#94a3b8', marginLeft: '8px', fontSize: '0.9rem' }}>₹{Number(combo.original_price).toFixed(2)}</span>}
+                  </div>
+                  <div className="product-info-card">
+                    <span className="product-category">{combo.category || 'WELLNESS'}</span>
+                    <h3 className="product-name">{combo.name}</h3>
+                    
+                    <div className="product-rating" style={{ display: 'flex', alignItems: 'center', gap: '4px', margin: '4px 0 8px' }}>
+                      <span className="stars" style={{ color: '#f5a623', fontSize: '0.9rem' }}>
+                        ★★★★★
+                      </span>
+                      <span className="reviews-count" style={{ fontSize: '0.8rem', color: '#64748b' }}>(4.5)</span>
+                    </div>
+
+                    <div className="product-price">
+                      ₹{Number(combo.price).toFixed(2)}
+                      {combo.original_price && <span className="original-price" style={{marginLeft: '8px', textDecoration: 'line-through', color: 'var(--color-text-muted)', fontSize: '0.85rem'}}>₹{Number(combo.original_price).toFixed(2)}</span>}
                     </div>
                   </div>
                 </Link>
-                <button 
-                  className="combo-shop-btn"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const sizeData = combo.sizes && combo.sizes.length > 0 ? combo.sizes[0] : null;
-                    addToCart(combo.id, 1, sizeData);
-                  }}
-                  style={{ marginTop: '16px', width: '100%', padding: '12px', border: 'none', borderRadius: '8px', backgroundColor: 'var(--color-primary-green)', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}
-                >
-                  Shop combo →
-                </button>
+                <div style={{ padding: '0 16px 16px' }}>
+                  <button 
+                    className="btn-add-cart"
+                    disabled={isAddedToCart}
+                    onClick={(e) => {
+                      if (isAddedToCart) return;
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const sizeData = combo.sizes && combo.sizes.length > 0 ? combo.sizes[0] : null;
+                      addToCart(combo.id, 1, sizeData);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      backgroundColor: isAddedToCart ? '#f5b041' : 'var(--color-primary-green)',
+                      color: 'white',
+                      border: 'none',
+                      fontWeight: '600',
+                      cursor: isAddedToCart ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {isAddedToCart ? '✓ Added to cart' : 'Add to cart'}
+                  </button>
+                </div>
               </div>
-            ))}
+            )})}
           </div>
         )}
       </div>

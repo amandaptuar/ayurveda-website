@@ -20,6 +20,23 @@ const Profile = () => {
     }
     
     fetchProfileData()
+
+    // Subscribe to realtime order updates for this specific user
+    const orderSubscription = supabase
+      .channel('custom-update-channel')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'orders', filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          // Re-fetch data when the admin updates the status
+          fetchProfileData()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(orderSubscription)
+    }
   }, [user, navigate])
 
   const fetchProfileData = async () => {
@@ -163,7 +180,31 @@ const Profile = () => {
                               <span className="order-id">#{order.id.split('-')[0].toUpperCase()}</span>
                               <span className="order-date">{new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                             </div>
-                            <div className="order-status">Confirmed</div>
+                            <div className={`order-status status-${order.status || 'pending'}`} style={{
+                              padding: '6px 12px',
+                              borderRadius: '20px',
+                              fontSize: '0.8rem',
+                              fontWeight: '600',
+                              textTransform: 'capitalize',
+                              backgroundColor: order.status === 'delivered' ? '#dcfce7' : 
+                                               order.status === 'shipped' ? '#e0e7ff' : 
+                                               order.status === 'cancelled' ? '#fee2e2' : 
+                                               order.status === 'confirmed' ? '#dbeafe' : '#fef3c7',
+                              color: order.status === 'delivered' ? '#166534' : 
+                                     order.status === 'shipped' ? '#3730a3' : 
+                                     order.status === 'cancelled' ? '#991b1b' : 
+                                     order.status === 'confirmed' ? '#1e40af' : '#92400e',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px'
+                            }}>
+                              {order.status === 'delivered' && '✅'}
+                              {order.status === 'shipped' && '🚚'}
+                              {order.status === 'pending' && '⏳'}
+                              {order.status === 'cancelled' && '❌'}
+                              {order.status === 'confirmed' && '👍'}
+                              {order.status || 'pending'}
+                            </div>
                           </div>
                           
                           <div className="order-card-body">

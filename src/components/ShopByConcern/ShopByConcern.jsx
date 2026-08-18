@@ -9,7 +9,7 @@ const ShopByConcern = () => {
   const [tabs, setTabs] = useState([])
   const [activeTab, setActiveTab] = useState('')
   const [loading, setLoading] = useState(true)
-  const { addToCart } = useCart()
+  const { addToCart, cartItems } = useCart()
 
   useEffect(() => {
     fetchAllProducts()
@@ -96,47 +96,69 @@ const ShopByConcern = () => {
             {/* Product Grid */}
             <div className="concern-products">
               {currentProducts.length > 0 ? (
-                currentProducts.map((product) => (
+                currentProducts.map((product) => {
+                  const isAddedToCart = cartItems?.some(item => item.product_id === product.id);
+                  return (
                   <div className="product-card" key={product.id}>
                     <Link to={`/products/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <div className="product-image placeholder-image" style={product.image_url ? { backgroundImage: `url(${product.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
+                      <div className="product-image-container">
                         {product.is_bestseller && (
                           <span className="badge-bestseller">✦ Bestseller</span>
                         )}
-                        {!product.image_url && (
-                          <div className="placeholder-text">
+                        {product.image_url ? (
+                          <img src={product.image_url} alt={product.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                        ) : (
+                          <div className="placeholder-image">
                             <span className="placeholder-icon">📦</span>
-                            {product.name}
+                            <span className="placeholder-text">{product.name}</span>
                           </div>
                         )}
                       </div>
-                      <div className="product-info">
+                      <div className="product-info-card">
                         <span className="product-category">{product.category || 'WELLNESS'}</span>
                         <h3 className="product-name">{product.name}</h3>
-                        <p className="product-desc">{product.description ? (product.description.length > 50 ? product.description.substring(0, 50) + '...' : product.description) : 'Natural Ayurvedic Formula'}</p>
-                        <div className="star-rating">
-                          {renderStars(4.5)}
-                          <span className="count">(4.5)</span>
+                        
+                        <div className="product-rating" style={{ display: 'flex', alignItems: 'center', gap: '4px', margin: '4px 0 8px' }}>
+                          <span className="stars" style={{ color: '#f5a623', fontSize: '0.9rem' }}>
+                            ★★★★★
+                          </span>
+                          <span className="reviews-count" style={{ fontSize: '0.8rem', color: '#64748b' }}>(4.5)</span>
                         </div>
-                        <div className="price-group">
-                          <span className="price-current">₹{product.price}</span>
-                          {product.original_price && <span className="price-original" style={{ textDecoration: 'line-through', color: '#94a3b8', marginLeft: '8px', fontSize: '0.9rem' }}>₹{product.original_price}</span>}
+
+                        <div className="product-price">
+                          ₹{Number(product.price).toFixed(2)}
+                          {product.original_price && <span className="original-price" style={{marginLeft: '8px', textDecoration: 'line-through', color: 'var(--color-text-muted)', fontSize: '0.85rem'}}>₹{Number(product.original_price).toFixed(2)}</span>}
                         </div>
                       </div>
                     </Link>
-                    <button 
-                      className="add-to-cart-btn"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        const sizeData = product.sizes && product.sizes.length > 0 ? product.sizes[0] : null;
-                        addToCart(product.id, 1, sizeData);
-                      }}
-                    >
-                      Add to cart
-                    </button>
+                    <div style={{ padding: '0 16px 16px' }}>
+                      <button 
+                        className="btn-add-cart"
+                        disabled={isAddedToCart}
+                        onClick={(e) => {
+                          if (isAddedToCart) return;
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const sizeData = product.sizes && product.sizes.length > 0 ? product.sizes[0] : null;
+                          addToCart(product.id, 1, sizeData);
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '10px',
+                          borderRadius: '8px',
+                          backgroundColor: isAddedToCart ? '#f5b041' : 'var(--color-primary-green)',
+                          color: 'white',
+                          border: 'none',
+                          fontWeight: '600',
+                          cursor: isAddedToCart ? 'not-allowed' : 'pointer',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        {isAddedToCart ? '✓ Added to cart' : 'Add to cart'}
+                      </button>
+                    </div>
                   </div>
-                ))
+                )})
               ) : (
                 <div style={{ textAlign: 'center', gridColumn: '1 / -1', padding: '60px 20px', backgroundColor: '#f8fafc', borderRadius: '16px', color: '#64748b' }}>
                   <h3>No products found for this concern!</h3>

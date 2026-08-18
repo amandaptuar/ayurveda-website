@@ -81,9 +81,7 @@ function App() {
     <div className="app">
       <Toaster 
         position="top-center" 
-        toastOptions={{ 
-          style: { zIndex: 999999 } 
-        }} 
+        containerStyle={{ zIndex: 9999999 }}
       />
       
       {/* Route Transition Loader */}

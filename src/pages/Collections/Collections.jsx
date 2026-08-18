@@ -8,7 +8,7 @@ import './Collections.css'
 const Collections = () => {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
-  const { addToCart } = useCart()
+  const { addToCart, cartItems } = useCart()
 
   useEffect(() => {
     fetchProducts()
@@ -115,7 +115,9 @@ const Collections = () => {
               </div>
             ) : (
               <div className="products-grid">
-                {displayedProducts.map((product) => (
+                {displayedProducts.map((product) => {
+                  const isAddedToCart = cartItems?.some(item => item.product_id === product.id);
+                  return (
                   <Link to={`/products/${product.id}`} key={product.id} className="product-card">
                     <div className="product-image-container">
                       {product.image_url ? (
@@ -149,19 +151,25 @@ const Collections = () => {
                       
                       <button 
                         className="btn-add-cart"
+                        disabled={isAddedToCart}
                         onClick={(e) => {
+                          if (isAddedToCart) return;
                           e.preventDefault();
                           e.stopPropagation();
                           // Get first size if available
                           const sizeData = product.sizes && product.sizes.length > 0 ? product.sizes[0] : null;
                           addToCart(product.id, 1, sizeData);
                         }}
+                        style={{
+                          backgroundColor: isAddedToCart ? '#f5b041' : 'var(--color-primary-green)',
+                          cursor: isAddedToCart ? 'not-allowed' : 'pointer'
+                        }}
                       >
-                        Add to cart
+                        {isAddedToCart ? '✓ Added to cart' : 'Add to cart'}
                       </button>
                     </div>
                   </Link>
-                ))}
+                )})}
               </div>
             )}
           </>
