@@ -29,8 +29,7 @@ const Dashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const [usersData, productsData, ordersData] = await Promise.all([
-        supabase.from('profiles').select('id', { count: 'exact' }),
+      const [productsData, ordersData] = await Promise.all([
         supabase.from('products').select('id', { count: 'exact' }),
         supabase.from('orders').select('id, total_amount, created_at')
       ]);
@@ -41,7 +40,6 @@ const Dashboard = () => {
       const ordersTodayCount = ordersData.data?.filter(order => order.created_at.startsWith(todayStr)).length || 0;
 
       setStats({
-        users: usersData.count || 0,
         products: productsData.count || 0,
         orders: ordersData.data?.length || 0,
         ordersToday: ordersTodayCount,
@@ -62,7 +60,6 @@ const Dashboard = () => {
       </div>
       
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px', marginBottom: '32px' }}>
-        <StatCard title="Total Users" value={stats.users} icon={Users} color="#2d5a27" />
         <StatCard title="Total Products" value={stats.products} icon={Package} color="#3a7233" />
         <StatCard title="Total Orders" value={stats.orders} icon={ShoppingCart} color="#e67e22" />
         <StatCard title="Orders Today" value={stats.ordersToday} icon={ShoppingCart} color="#d35400" />

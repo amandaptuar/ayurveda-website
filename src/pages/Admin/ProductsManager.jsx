@@ -224,11 +224,28 @@ const ProductsManager = () => {
           .from('products')
           .delete()
           .eq('id', id);
-        if (error) throw error;
-        toast.success('Product deleted');
+          
+        if (error) {
+          // Check for foreign key constraint violation (usually 23503 in PostgreSQL)
+          // Meaning the product has been ordered and is referenced in order_items
+          if (error.code === '23503' || error.message.includes('foreign key')) {
+            const { error: archiveError } = await supabase
+              .from('products')
+              .update({ status: 'archived' })
+              .eq('id', id);
+              
+            if (archiveError) throw archiveError;
+            
+            toast.success('Product archived. It cannot be completely deleted because it exists in customer orders.');
+          } else {
+            throw error;
+          }
+        } else {
+          toast.success('Product deleted successfully');
+        }
         fetchProducts();
       } catch (error) {
-        toast.error('Error deleting product');
+        toast.error(error.message || 'Error deleting product');
         console.error(error);
       }
     }

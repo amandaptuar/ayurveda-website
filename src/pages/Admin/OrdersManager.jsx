@@ -117,7 +117,11 @@ const OrdersManager = () => {
                   <td>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <span style={{ fontWeight: '600' }}>{order.customer_name || 'Unknown Name'}</span>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--admin-text-secondary)' }}>{order.profiles?.email || 'Unknown Email'}</span>
+                      {order.profiles?.email && (
+                        <span style={{ fontSize: '0.85rem', color: 'var(--admin-text-secondary)' }}>
+                          📧 {order.profiles.email}
+                        </span>
+                      )}
                       {order.customer_phone && <span style={{ fontSize: '0.85rem', color: 'var(--admin-text-secondary)' }}>📞 {order.customer_phone}</span>}
                       
                       {order.shipping_address && (
