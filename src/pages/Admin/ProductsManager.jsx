@@ -227,8 +227,14 @@ const ProductsManager = () => {
           
         if (error) {
           // Check for foreign key constraint violation (usually 23503 in PostgreSQL)
+          // Or a not-null constraint if the foreign key tries to SET NULL
           // Meaning the product has been ordered and is referenced in order_items
-          if (error.code === '23503' || error.message.includes('foreign key')) {
+          if (
+            error.code === '23503' || 
+            error.code === '23502' || 
+            error.message.includes('foreign key') || 
+            error.message.includes('not-null constraint')
+          ) {
             const { error: archiveError } = await supabase
               .from('products')
               .update({ status: 'archived' })

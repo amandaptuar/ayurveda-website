@@ -106,10 +106,16 @@ const Checkout = () => {
 
       // 3. Create order items
       const orderItems = cartItems.map(item => {
-        const price = item.selected_size?.price ? Number(item.selected_size.price) : Number(item.products.price);
+        const price = item.selected_size?.price ? Number(item.selected_size.price) : Number(item.products?.price || 0);
+        const productId = item.product_id || item.products?.id;
+        
+        if (!productId) {
+          throw new Error('Missing product ID for an item in your cart.');
+        }
+
         return {
           order_id: order.id,
-          product_id: item.product_id,
+          product_id: productId,
           quantity: item.quantity,
           price_at_time: price,
           selected_size: item.selected_size || null
