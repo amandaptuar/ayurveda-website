@@ -44,6 +44,25 @@ const OrderSuccess = () => {
     window.print()
   }
 
+  const handleCancelOrder = async () => {
+    if (window.confirm('Are you sure you want to cancel this order?')) {
+      try {
+        const { error } = await supabase
+          .from('orders')
+          .update({ status: 'cancelled' })
+          .eq('id', orderId);
+          
+        if (error) throw error;
+        
+        alert('Order cancelled successfully.');
+        fetchOrderDetails();
+      } catch (error) {
+        console.error('Error cancelling order:', error);
+        alert('Failed to cancel order. Please try again.');
+      }
+    }
+  }
+
   if (loading) return <div style={{ padding: '100px', textAlign: 'center' }}>Loading your receipt...</div>
   
   if (!order) return (
@@ -74,6 +93,15 @@ const OrderSuccess = () => {
         </div>
         <p>Thank you for shopping with us.</p>
         <div className="action-buttons-group">
+          {(order.status === 'pending' || order.status === 'confirmed') && (
+            <button 
+              onClick={handleCancelOrder} 
+              className="continue-btn-outline"
+              style={{ borderColor: '#fee2e2', color: '#991b1b', backgroundColor: '#fee2e2' }}
+            >
+              Cancel Order
+            </button>
+          )}
           <button onClick={handlePrint} className="print-btn">
             Download PDF Receipt
           </button>

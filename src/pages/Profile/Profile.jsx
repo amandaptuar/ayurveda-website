@@ -78,6 +78,25 @@ const Profile = () => {
     }
   }
 
+  const handleCancelOrder = async (orderId) => {
+    if (window.confirm('Are you sure you want to cancel this order?')) {
+      try {
+        const { error } = await supabase
+          .from('orders')
+          .update({ status: 'cancelled' })
+          .eq('id', orderId);
+          
+        if (error) throw error;
+        
+        alert('Order cancelled successfully.');
+        fetchProfileData();
+      } catch (error) {
+        console.error('Error cancelling order:', error);
+        alert('Failed to cancel order. Please try again.');
+      }
+    }
+  };
+
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to sign out?')) {
       logout()
@@ -223,7 +242,18 @@ const Profile = () => {
                               <span className="order-total-label">Total Amount: </span>
                               <span className="order-total-value">₹{Number(order.total_amount).toFixed(2)}</span>
                             </div>
-                            <Link to={`/order-success/${order.id}`} className="view-receipt-btn">View Receipt</Link>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                              {(order.status === 'pending' || order.status === 'confirmed') && (
+                                <button 
+                                  onClick={() => handleCancelOrder(order.id)}
+                                  className="view-receipt-btn" 
+                                  style={{ backgroundColor: '#fee2e2', color: '#991b1b', border: 'none', cursor: 'pointer' }}
+                                >
+                                  Cancel Order
+                                </button>
+                              )}
+                              <Link to={`/order-success/${order.id}`} className="view-receipt-btn">View Receipt</Link>
+                            </div>
                           </div>
                         </div>
                       ))}

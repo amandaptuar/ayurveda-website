@@ -376,7 +376,7 @@
   display: none;
 }
 
-.product-card {
+.related-products-grid .product-card {
   background: white;
   border-radius: 12px;
   overflow: hidden;
@@ -391,7 +391,7 @@
   scroll-snap-align: start;
 }
 
-.product-card:hover {
+.related-products-grid .product-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 25px rgba(0,0,0,0.08);
 }
@@ -631,7 +631,7 @@
     scroll-snap-type: x mandatory;
   }
 
-  .product-card {
+  .related-products-grid .product-card {
     min-width: 200px;
     width: 200px;
   }

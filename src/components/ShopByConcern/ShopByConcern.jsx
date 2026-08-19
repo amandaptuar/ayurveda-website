@@ -125,9 +125,20 @@ const ShopByConcern = () => {
                           <span className="reviews-count" style={{ fontSize: '0.8rem', color: '#64748b' }}>(4.5)</span>
                         </div>
 
-                        <div className="product-price">
-                          ₹{Number(product.price).toFixed(2)}
-                          {product.original_price && <span className="original-price" style={{marginLeft: '8px', textDecoration: 'line-through', color: 'var(--color-text-muted)', fontSize: '0.85rem'}}>₹{Number(product.original_price).toFixed(2)}</span>}
+                        <div className="product-price-box">
+                          <div className="price-current">
+                            <span className="price-symbol">₹</span>
+                            <span className="price-amount">{Number(product.price).toLocaleString('en-IN')}</span>
+                          </div>
+                          {product.original_price && Number(product.original_price) > Number(product.price) && (
+                            <div className="price-original-row">
+                              <span className="mrp-label">M.R.P:</span>
+                              <span className="original-price">₹{Number(product.original_price).toLocaleString('en-IN')}</span>
+                              <span className="discount-badge">
+                                {Math.round(((product.original_price - product.price) / product.original_price) * 100)}% off
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </Link>
@@ -141,17 +152,6 @@ const ShopByConcern = () => {
                           e.stopPropagation();
                           const sizeData = product.sizes && product.sizes.length > 0 ? product.sizes[0] : null;
                           addToCart(product.id, 1, sizeData);
-                        }}
-                        style={{
-                          width: '100%',
-                          padding: '10px',
-                          borderRadius: '8px',
-                          backgroundColor: isAddedToCart ? '#f5b041' : 'var(--color-primary-green)',
-                          color: 'white',
-                          border: 'none',
-                          fontWeight: '600',
-                          cursor: isAddedToCart ? 'not-allowed' : 'pointer',
-                          transition: 'all 0.2s'
                         }}
                       >
                         {isAddedToCart ? '✓ Added to cart' : 'Add to cart'}

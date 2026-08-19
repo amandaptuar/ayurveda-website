@@ -22,7 +22,7 @@ const ShopByCategories = () => {
 
         <div className="categories-grid">
           {categories.map((cat, index) => (
-            <Link to="/collections/all" key={index} className="category-card" style={{ textDecoration: 'none' }}>
+            <Link to={`/collections/all?search=${encodeURIComponent(cat.name)}`} key={index} className="category-card" style={{ textDecoration: 'none' }}>
               <div className="category-icon-wrapper">
                 <span className="category-icon">{cat.icon}</span>
               </div>

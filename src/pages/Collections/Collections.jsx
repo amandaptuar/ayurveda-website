@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { supabase } from '../../lib/supabase'
 import { useCart } from '../../context/CartContext'
 import './Collections.css'
 
 const Collections = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const initialSearch = searchParams.get('search') || ''
+  
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const { addToCart, cartItems } = useCart()
@@ -31,19 +34,33 @@ const Collections = () => {
     }
   }
 
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState(initialSearch)
   const [sortOption, setSortOption] = useState('featured')
 
+  // Update URL search params when search query changes
+  useEffect(() => {
+    if (searchQuery) {
+      setSearchParams({ search: searchQuery })
+    } else {
+      setSearchParams({})
+    }
+  }, [searchQuery, setSearchParams])
+
   // Derive displayed products based on search and sort
-  let displayedProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase()))
-  )
+  let displayedProducts = products.filter(p => {
+    const search = searchQuery.toLowerCase().trim()
+    if (!search) return true
+    
+    const nameMatch = p.name ? p.name.toLowerCase().includes(search) : false
+    const categoryMatch = p.category ? p.category.toLowerCase().includes(search) : false
+    
+    return nameMatch || categoryMatch
+  })
 
   if (sortOption === 'price-asc') {
-    displayedProducts.sort((a, b) => a.price - b.price)
+    displayedProducts.sort((a, b) => Number(a.price || 0) - Number(b.price || 0))
   } else if (sortOption === 'price-desc') {
-    displayedProducts.sort((a, b) => b.price - a.price)
+    displayedProducts.sort((a, b) => Number(b.price || 0) - Number(a.price || 0))
   }
 
   // Skeleton Loader for Products
@@ -131,7 +148,7 @@ const Collections = () => {
                     </div>
                     <div className="product-info-card">
                       <span className="product-category">{product.category || 'WELLNESS'}</span>
-                      <h3 className="product-name">{product.name}</h3>
+                      <h3 className="product-name" title={product.name}>{product.name}</h3>
                       
                       <div className="product-rating">
                         <span className="stars">
@@ -141,12 +158,27 @@ const Collections = () => {
                           <span className="star-filled">★</span>
                           <span className="star-filled">★</span>
                         </span>
-                        <span className="reviews-count">(5.0)</span>
+                        <span className="reviews-count">5.0</span>
                       </div>
 
-                      <div className="product-price">
-                        ₹{Number(product.price).toFixed(2)}
-                        {product.original_price && <span className="original-price" style={{marginLeft: '8px', textDecoration: 'line-through', color: 'var(--color-text-muted)'}}>₹{Number(product.original_price).toFixed(2)}</span>}
+                      {product.description && (
+                        <p className="product-desc" dangerouslySetInnerHTML={{ __html: product.description.substring(0, 80) + '...' }}></p>
+                      )}
+
+                      <div className="product-price-box">
+                        <div className="price-current">
+                          <span className="price-symbol">₹</span>
+                          <span className="price-amount">{Number(product.price).toLocaleString('en-IN')}</span>
+                        </div>
+                        {product.original_price && Number(product.original_price) > Number(product.price) && (
+                          <div className="price-original-row">
+                            <span className="mrp-label">M.R.P:</span>
+                            <span className="original-price">₹{Number(product.original_price).toLocaleString('en-IN')}</span>
+                            <span className="discount-badge">
+                              {Math.round(((product.original_price - product.price) / product.original_price) * 100)}% off
+                            </span>
+                          </div>
+                        )}
                       </div>
                       
                       <button 
