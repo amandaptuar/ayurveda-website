@@ -287,7 +287,11 @@
 
 @media (max-width: 768px) {
   .products-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr !important;
+  }
+  
+  .products-grid .product-card {
+    width: 100% !important;
   }
   
   .filter-bar {
@@ -299,11 +303,5 @@
   .filter-right {
     width: 100%;
     justify-content: space-between;
-  }
-}
-
-@media (max-width: 600px) {
-  .products-grid {
-    grid-template-columns: 1fr;
   }
 }
