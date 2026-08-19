@@ -129,6 +129,14 @@ const OrderSuccess = () => {
             <span className="meta-label">Date:</span>
             <span className="meta-value">{new Date(order.created_at).toLocaleString()}</span>
           </div>
+          {order.status !== 'cancelled' && (
+            <div>
+              <span className="meta-label">Expected Delivery:</span>
+              <span className="meta-value" style={{ color: '#16a34a', fontWeight: 'bold' }}>
+                {new Date(new Date(order.created_at).getTime() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="receipt-divider"></div>

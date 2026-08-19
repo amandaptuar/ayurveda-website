@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../lib/supabase'
+import { Mail, MapPin } from 'lucide-react'
 import './Profile.css'
 
 const Profile = () => {
@@ -152,30 +153,43 @@ const Profile = () => {
             <>
               {activeTab === 'info' && (
                 <div className="profile-section">
-                  <h2 className="profile-section-title">Account Information</h2>
+                  <h2 className="profile-section-title">Account Settings</h2>
                   
-                  <div className="info-card">
-                    <div className="info-label">Email Address</div>
-                    <div className="info-value">{user.email}</div>
-                  </div>
-
-                  <h2 className="profile-section-title" style={{ marginTop: '40px' }}>Default Shipping Address</h2>
-                  {address ? (
-                    <div className="info-card">
-                      <div className="info-label">Deliver To</div>
-                      <div className="info-value" style={{ marginBottom: '8px' }}>{address.full_name}</div>
-                      <div style={{ color: 'var(--color-text-secondary)', lineHeight: '1.5' }}>
-                        {address.phone}<br />
-                        {address.street}<br />
-                        {address.city}, {address.state} - {address.zip_code}
+                  <div className="profile-cards-grid">
+                    <div className="modern-profile-card">
+                      <div className="card-icon-wrapper">
+                        <Mail size={24} color="#16a34a" />
+                      </div>
+                      <div className="card-content">
+                        <h3>Email Address</h3>
+                        <p>{user.email}</p>
                       </div>
                     </div>
-                  ) : (
-                    <div className="info-card" style={{ textAlign: 'center', padding: '40px 20px' }}>
-                      <div style={{ color: 'var(--color-text-secondary)', marginBottom: '16px' }}>No saved address found.</div>
-                      <Link to="/collections/all" style={{ color: 'var(--color-primary-green)', fontWeight: '600' }}>Shop now to save an address</Link>
+
+                    <div className="modern-profile-card">
+                      <div className="card-icon-wrapper">
+                        <MapPin size={24} color="#16a34a" />
+                      </div>
+                      <div className="card-content">
+                        <h3>Default Shipping Address</h3>
+                        {address ? (
+                          <>
+                            <p className="highlight-name">{address.full_name}</p>
+                            <p className="address-details">
+                              📞 {address.phone}<br />
+                              📍 {address.street}<br />
+                              {address.city}, {address.state} - {address.zip_code}
+                            </p>
+                          </>
+                        ) : (
+                          <div className="empty-state-address">
+                            <p>No saved address found.</p>
+                            <Link to="/collections/all">Shop now to save an address</Link>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               )}
 
@@ -225,6 +239,46 @@ const Profile = () => {
                               {order.status || 'pending'}
                             </div>
                           </div>
+                          
+                          {order.status === 'cancelled' ? (
+                            <div className="cancelled-alert">
+                              <p>Order Cancelled</p>
+                            </div>
+                          ) : (
+                            <div className="order-tracking-container">
+                              <div className="expected-delivery">
+                                {order.status === 'delivered' ? 'Delivered on ' : 'Arriving '}
+                                <span>
+                                  {new Date(new Date(order.created_at).getTime() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                                </span>
+                              </div>
+                              
+                              <div className="tracking-timeline">
+                                <div className="tracking-progress-bar" style={{ 
+                                  width: order.status === 'delivered' ? '100%' : 
+                                         order.status === 'shipped' ? '66%' : 
+                                         order.status === 'confirmed' ? '33%' : '0%' 
+                                }}></div>
+                                
+                                <div className={`tracking-step ${order.status !== 'cancelled' ? 'active' : ''}`}>
+                                  <div className="step-dot"></div>
+                                  <span className="step-label">Ordered</span>
+                                </div>
+                                <div className={`tracking-step ${['confirmed', 'shipped', 'delivered'].includes(order.status) ? 'active' : ''}`}>
+                                  <div className="step-dot"></div>
+                                  <span className="step-label">Processing</span>
+                                </div>
+                                <div className={`tracking-step ${['shipped', 'delivered'].includes(order.status) ? 'active' : ''}`}>
+                                  <div className="step-dot"></div>
+                                  <span className="step-label">Shipped</span>
+                                </div>
+                                <div className={`tracking-step ${order.status === 'delivered' ? 'active' : ''}`}>
+                                  <div className="step-dot"></div>
+                                  <span className="step-label">Delivered</span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                           
                           <div className="order-card-body">
                             <div className="order-items-preview">

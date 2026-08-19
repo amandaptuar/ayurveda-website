@@ -113,6 +113,11 @@ const OrdersManager = () => {
                     <div style={{ fontSize: '0.85rem', color: 'var(--admin-text-secondary)', marginTop: '4px' }}>
                       {new Date(order.created_at).toLocaleString()}
                     </div>
+                    {order.status !== 'cancelled' && order.status !== 'delivered' && (
+                      <div style={{ fontSize: '0.85rem', color: '#16a34a', marginTop: '4px', fontWeight: '600' }}>
+                        Expected: {new Date(new Date(order.created_at).getTime() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                      </div>
+                    )}
                   </td>
                   <td>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
