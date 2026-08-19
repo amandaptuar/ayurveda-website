@@ -11,6 +11,7 @@ export const CartProvider = ({ children }) => {
   const { user, setShowLoginModal } = useAuth();
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -147,7 +148,9 @@ export const CartProvider = ({ children }) => {
     updateQuantity,
     removeFromCart,
     clearCart,
-    fetchCart
+    fetchCart,
+    appliedCoupon,
+    setAppliedCoupon
   };
 
   return (

@@ -12,31 +12,31 @@ const Testimonials = () => {
   const testimonials = [
     {
       name: 'Priya Sharma',
-      text: '"I have been using Fair Deal\'s products for over a year now. The quality is outstanding and I can feel the difference in my health. The juices are pure and effective."',
+      text: '"I have been using Fair Deal\'s Live Kare DS Syrup for over a year now. The quality is outstanding and I can feel the difference in my health. It is pure and effective."',
       image: profile1,
       rating: 5,
     },
     {
       name: 'Rahul Kumar',
-      text: '"Very authentic products. The shipping was fast and the packaging was excellent. Highly recommend to anyone looking for genuine Ayurveda."',
+      text: '"Very authentic FT. Dhatu Paushtic Churn. The shipping was fast and the packaging was excellent. Highly recommend to anyone looking for genuine Ayurveda."',
       image: profile2,
       rating: 5,
     },
     {
       name: 'Vikram Singh',
-      text: '"I have ordered this juice for me, too much satisfied with this article and now I left pills and drinks this amazing juice regularly..thank you Fair Deal Trading Agency for giving us such a nice product..."',
+      text: '"I have ordered Cyst O Zero Syrup and Capsule for me, too much satisfied with this product and now I use it regularly..thank you Fair Deal Trading Agency for giving us such a nice product..."',
       image: profile3,
       rating: 5,
     },
     {
       name: 'Deepti Sharma',
-      text: '"I started using She Care a few months ago and have noticed a positive difference in my overall well-being. It has become a part of my daily routine, and I feel more active and comfortable than before."',
+      text: '"I started using Live Kare DS Syrup a few months ago and have noticed a positive difference in my overall well-being. It has become a part of my daily routine, and I feel more active and comfortable than before."',
       image: profile4,
       rating: 5,
     },
     {
       name: 'Deepak Singhania',
-      text: '"The Diabetes Care juice has helped me maintain healthy sugar levels. It tastes natural and has no artificial additives. Very satisfied with the results."',
+      text: '"The FT. Dhatu Paushtic Churn has helped me maintain healthy body function. It tastes natural and has no artificial additives. Very satisfied with the results."',
       image: profile5,
       rating: 5,
     },

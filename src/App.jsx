@@ -22,6 +22,7 @@ import AdminLayout from './pages/Admin/AdminLayout'
 import Dashboard from './pages/Admin/Dashboard'
 import ProductsManager from './pages/Admin/ProductsManager'
 import OrdersManager from './pages/Admin/OrdersManager'
+import CouponsManager from './pages/Admin/CouponsManager'
 
 const StoreLayout = () => (
   <>
@@ -114,6 +115,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="products" element={<ProductsManager />} />
           <Route path="orders" element={<OrdersManager />} />
+          <Route path="coupons" element={<CouponsManager />} />
         </Route>
       </Routes>
     </div>

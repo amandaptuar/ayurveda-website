@@ -167,6 +167,7 @@ const Product = () => {
               <span className="current-price">₹{Number(currentDisplayPrice).toFixed(2)}</span>
               {originalDisplayPrice && <span className="original-price">₹{Number(originalDisplayPrice).toFixed(2)}</span>}
             </div>
+            <p style={{ fontSize: '0.9rem', color: 'var(--color-primary-green)', marginTop: '6px', fontWeight: '600' }}>🚚 Free Delivery over ₹399</p>
           </div>
 
           <div className="offers-strip" style={{ marginTop: '12px' }}>

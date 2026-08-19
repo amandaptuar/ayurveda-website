@@ -7,14 +7,57 @@ import { toast } from 'react-hot-toast'
 import './Cart.css'
 
 const Cart = () => {
-  const { cartItems, cartTotal, loading, updateQuantity, removeFromCart, clearCart } = useCart()
+  const { cartItems, cartTotal, loading, updateQuantity, removeFromCart, clearCart, appliedCoupon, setAppliedCoupon } = useCart()
   const { user, setShowLoginModal } = useAuth()
   const [isCheckingOut, setIsCheckingOut] = useState(false)
+  const [couponInput, setCouponInput] = useState(appliedCoupon ? appliedCoupon.code : '')
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false)
   const navigate = useNavigate()
 
   const subtotal = cartTotal
-  const shipping = subtotal > 500 || subtotal === 0 ? 0 : 50
-  const total = subtotal + shipping
+  const shipping = subtotal > 399 || subtotal === 0 ? 0 : 50
+
+  let discount = 0
+  if (appliedCoupon) {
+    if (appliedCoupon.discount_type === 'percentage') {
+      discount = subtotal * (appliedCoupon.discount_value / 100)
+    } else {
+      discount = appliedCoupon.discount_value
+    }
+    if (discount > subtotal) discount = subtotal
+  }
+
+  const total = subtotal + shipping - discount
+
+  const handleApplyCoupon = async () => {
+    if (!couponInput) return
+    setIsApplyingCoupon(true)
+    try {
+      const { data, error } = await supabase
+        .from('coupons')
+        .select('*')
+        .eq('code', couponInput.toUpperCase().trim())
+        .eq('is_active', true)
+        .single()
+        
+      if (error || !data) {
+        toast.error('Invalid or expired coupon code')
+        setAppliedCoupon(null)
+      } else {
+        setAppliedCoupon(data)
+        toast.success('Coupon applied successfully!')
+      }
+    } catch (err) {
+      toast.error('Error applying coupon')
+    } finally {
+      setIsApplyingCoupon(false)
+    }
+  }
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null)
+    setCouponInput('')
+  }
 
   const handleCheckout = async () => {
     if (!user) {
@@ -106,10 +149,38 @@ const Cart = () => {
                   <span>Shipping</span>
                   <span>{shipping === 0 ? 'Free' : `₹ ${Number(shipping).toFixed(2)}`}</span>
                 </div>
+                {appliedCoupon && (
+                  <div className="summary-row" style={{ color: 'var(--color-primary-green)' }}>
+                    <span>Discount ({appliedCoupon.code}) <button onClick={handleRemoveCoupon} style={{background:'none',border:'none',color:'red',cursor:'pointer',fontSize:'0.8rem',marginLeft:'4px'}}>✕</button></span>
+                    <span>-₹ {Number(discount).toFixed(2)}</span>
+                  </div>
+                )}
                 <hr className="summary-divider" />
                 <div className="summary-row summary-total">
                   <span>Total</span>
                   <span>₹ {Number(total).toFixed(2)}</span>
+                </div>
+
+                <div className="cart-coupon-section" style={{ marginTop: '16px', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input 
+                      type="text" 
+                      placeholder="Coupon Code" 
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value)}
+                      style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', textTransform: 'uppercase' }}
+                      disabled={appliedCoupon !== null}
+                    />
+                    {!appliedCoupon && (
+                      <button 
+                        onClick={handleApplyCoupon}
+                        disabled={isApplyingCoupon || !couponInput}
+                        style={{ padding: '10px 16px', background: 'var(--color-primary-green)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}
+                      >
+                        {isApplyingCoupon ? '...' : 'Apply'}
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <button 
                   className="checkout-btn" 
