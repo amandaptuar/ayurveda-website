@@ -13,6 +13,8 @@ import Cart from './pages/Cart/Cart'
 import Checkout from './pages/Checkout/Checkout'
 import OrderSuccess from './pages/OrderSuccess/OrderSuccess'
 import Profile from './pages/Profile/Profile'
+import TermsAndConditions from './pages/TermsAndConditions/TermsAndConditions'
+import PrivacyPolicy from './pages/PrivacyPolicy/PrivacyPolicy'
 import logoImg from './assets/image.png'
 
 // Admin Pages
@@ -104,6 +106,8 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-success/:orderId" element={<OrderSuccess />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         </Route>
         
         <Route path="/admin" element={<AdminLayout />}>

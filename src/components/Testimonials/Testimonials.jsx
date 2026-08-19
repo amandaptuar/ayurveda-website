@@ -52,7 +52,7 @@ const Testimonials = () => {
   return (
     <section className="testimonials">
       <div className="container">
-        <h2 className="testimonials-heading">Over 1,00,000,00+ People Uses</h2>
+        <h2 className="testimonials-heading">Over 50,000+ People Uses</h2>
         <p className="testimonials-subtext">
           Empowering healthier lives through authentic Ayurvedic care, thoughtfully<br />
           crafted to support your daily wellness journey.

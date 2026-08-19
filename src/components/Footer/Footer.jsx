@@ -8,8 +8,8 @@ const Footer = () => {
     { label: 'Home', path: '/' },
     { label: 'Products', path: '/collections/all' },
     { label: 'Contact', path: '/contact' },
-    { label: 'Terms & Conditions', path: '#' },
-    { label: 'Privacy Policy', path: '#' },
+    { label: 'Terms & Conditions', path: '/terms-and-conditions' },
+    { label: 'Privacy Policy', path: '/privacy-policy' },
   ]
 
   return (

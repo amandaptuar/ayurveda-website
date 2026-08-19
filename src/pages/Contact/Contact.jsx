@@ -32,7 +32,7 @@ const Contact = () => {
               <span className="info-icon">📍</span>
               <div>
                 <h3>Our Location</h3>
-                <p>FAIR DEAL TRADING AGENCY<br/>Plot No. 1, Heavy Industrial Area,<br/>Jodhpur, Rajasthan, India - 342001</p>
+                <p>FAIR DEAL TRADING AGENCY<br/>Shahbad Gate, Kashiram Colony,<br/>Rampur (U.P) 244901</p>
               </div>
             </div>
             
@@ -40,15 +40,7 @@ const Contact = () => {
               <span className="info-icon">📞</span>
               <div>
                 <h3>Phone Number</h3>
-                <p>+91-8619602766<br/>Mon - Sat: 9:00 AM to 6:00 PM</p>
-              </div>
-            </div>
-
-            <div className="info-card">
-              <span className="info-icon">✉️</span>
-              <div>
-                <h3>Email Address</h3>
-                <p>care@krishnaayurved.com<br/>We reply within 24 hours</p>
+                <p>+91 70887 11540<br/>Mon - Sat: 9:00 AM to 6:00 PM</p>
               </div>
             </div>
           </div>

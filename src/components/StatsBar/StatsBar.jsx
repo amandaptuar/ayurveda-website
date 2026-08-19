@@ -3,7 +3,7 @@ import './StatsBar.css'
 
 const StatsBar = () => {
   const stats = [
-    { value: '10,000,000+', label: 'HAPPY CUSTOMERS' },
+    { value: '50,000+', label: 'HAPPY CUSTOMERS' },
     { value: '200+', label: 'HERBAL PRODUCTS' },
     { value: '4.9★', label: 'AVG. RATING' },
   ]
