@@ -24,14 +24,14 @@ const Testimonials = () => {
     },
     {
       name: 'Vikram Singh',
-      text: '"I have ordered Cyst O Zero Syrup and Capsule for me, too much satisfied with this product and now I use it regularly..thank you Fair Deal Trading Agency for giving us such a nice product..."',
-      image: profile3,
+      text: '"I started using Live Kare DS Syrup a few months ago and have noticed a positive difference in my overall well-being. It has become a part of my daily routine, and I feel more active and comfortable than before."',
+      image: profile4,
       rating: 5,
     },
     {
       name: 'Deepti Sharma',
-      text: '"I started using Live Kare DS Syrup a few months ago and have noticed a positive difference in my overall well-being. It has become a part of my daily routine, and I feel more active and comfortable than before."',
-      image: profile4,
+      text: '"I have ordered Cyst O Zero Syrup and Capsule for me, too much satisfied with this product and now I use it regularly..thank you Fair Deal Trading Agency for giving us such a nice product..."',
+      image: profile3,
       rating: 5,
     },
     {

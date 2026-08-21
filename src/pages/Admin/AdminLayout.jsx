@@ -19,11 +19,8 @@ const AdminLayout = () => {
 
   if (loading && !isBypassed) return <div className="admin-loading" style={{display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center'}}>Loading...</div>;
   
-  // If not logged in at all and not bypassed, show the Admin Login page
-  if (!user && !isBypassed) return <AdminLogin />;
-  
-  // If logged in but NOT an admin, and not bypassed, kick them back to the storefront
-  if (user && !isAdmin && !isBypassed) return <Navigate to="/" replace />;
+  // If not an admin and not bypassed, show the Admin Login page (allows them to enter bypass credentials)
+  if ((!user || !isAdmin) && !isBypassed) return <AdminLogin />;
 
   const getInitials = (email) => {
     if (isBypassed && !user) return 'A';

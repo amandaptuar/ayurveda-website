@@ -5,6 +5,8 @@ import { toast } from 'react-hot-toast';
 
 const ProductsManager = () => {
   const [products, setProducts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -15,6 +17,15 @@ const ProductsManager = () => {
   const [mainImagePreview, setMainImagePreview] = useState('');
   const [additionalFiles, setAdditionalFiles] = useState([]);
   const [additionalPreviews, setAdditionalPreviews] = useState([]);
+
+  const categories = ['All', ...new Set(products.map(p => p.category).filter(Boolean))];
+
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesCategory = categoryFilter === 'All' || product.category === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
   
   const [formData, setFormData] = useState({
     name: '',
@@ -269,6 +280,27 @@ const ProductsManager = () => {
         </button>
       </div>
 
+      <div className="admin-card" style={{ marginBottom: '20px', padding: '16px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+        <input 
+          type="text" 
+          placeholder="Search products..." 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="admin-input"
+          style={{ flex: '1', minWidth: '200px' }}
+        />
+        <select 
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className="admin-input"
+          style={{ width: 'auto', minWidth: '150px' }}
+        >
+          {categories.map(cat => (
+            <option key={cat} value={cat}>{cat === 'All' ? 'All Categories' : cat}</option>
+          ))}
+        </select>
+      </div>
+
       <div className="admin-card">
         <div className="admin-table-container">
           <table className="admin-table">
@@ -284,7 +316,7 @@ const ProductsManager = () => {
             <tbody>
               {loading ? (
                 <tr><td colSpan="5" style={{textAlign: 'center', padding: '40px'}}>Loading products...</td></tr>
-              ) : products.map((product) => (
+              ) : filteredProducts.map((product) => (
                 <tr key={product.id}>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

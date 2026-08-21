@@ -10,6 +10,9 @@ const Footer = () => {
     { label: 'Contact', path: '/contact' },
     { label: 'Terms & Conditions', path: '/terms-and-conditions' },
     { label: 'Privacy Policy', path: '/privacy-policy' },
+    { label: 'Disclaimer', path: '/disclaimer' },
+    { label: 'Return & Refund Policy', path: '/refund-policy' },
+    { label: 'Shipping Policy', path: '/shipping-policy' },
   ]
 
   return (

@@ -36,6 +36,11 @@ const Collections = () => {
 
   const [searchQuery, setSearchQuery] = useState(initialSearch)
   const [sortOption, setSortOption] = useState('featured')
+  const [selectedCategory, setSelectedCategory] = useState('All')
+  const [currentPage, setCurrentPage] = useState(1)
+  const productsPerPage = 12
+
+  const categories = ['All', ...new Set(products.map(p => p.category).filter(Boolean))]
 
   // Update URL search params when search query changes
   useEffect(() => {
@@ -46,15 +51,22 @@ const Collections = () => {
     }
   }, [searchQuery, setSearchParams])
 
-  // Derive displayed products based on search and sort
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, sortOption, selectedCategory])
+
+  // Derive displayed products based on search, category and sort
   let displayedProducts = products.filter(p => {
     const search = searchQuery.toLowerCase().trim()
-    if (!search) return true
+    const matchesSearch = search === '' || (
+      (p.name && p.name.toLowerCase().includes(search)) ||
+      (p.category && p.category.toLowerCase().includes(search))
+    )
     
-    const nameMatch = p.name ? p.name.toLowerCase().includes(search) : false
-    const categoryMatch = p.category ? p.category.toLowerCase().includes(search) : false
-    
-    return nameMatch || categoryMatch
+    const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory
+
+    return matchesSearch && matchesCategory
   })
 
   if (sortOption === 'price-asc') {
@@ -62,6 +74,13 @@ const Collections = () => {
   } else if (sortOption === 'price-desc') {
     displayedProducts.sort((a, b) => Number(b.price || 0) - Number(a.price || 0))
   }
+
+  // Pagination
+  const totalPages = Math.ceil(displayedProducts.length / productsPerPage) || 1
+  const paginatedProducts = displayedProducts.slice(
+    (currentPage - 1) * productsPerPage,
+    currentPage * productsPerPage
+  )
 
   // Skeleton Loader for Products
   const renderSkeleton = () => (
@@ -99,29 +118,44 @@ const Collections = () => {
           </div>
         ) : (
           <>
-            <div className="filter-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '16px', backgroundColor: 'white', padding: '16px 20px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', border: '1px solid #f1f5f9' }}>
-              <div className="search-filter" style={{ flex: '1', minWidth: '250px', position: 'relative' }}>
-                <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>🔍</span>
+            <div className="filter-bar">
+              <div className="search-filter">
+                <span className="search-icon">🔍</span>
                 <input 
                   type="text" 
                   placeholder="Search for products, categories..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{ width: '100%', padding: '12px 16px 12px 40px', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none', fontSize: '0.95rem', backgroundColor: '#f8fafc', transition: 'border-color 0.2s' }}
+                  className="search-input"
                 />
               </div>
               
-              <div className="sort-by" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontWeight: '600', color: '#475569', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Sort by:</span>
-                <select 
-                  value={sortOption} 
-                  onChange={(e) => setSortOption(e.target.value)}
-                  style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none', cursor: 'pointer', backgroundColor: '#f8fafc', fontWeight: '500', color: '#334155' }}
-                >
-                  <option value="featured">Featured (Newest)</option>
-                  <option value="price-asc">Price: Low to High</option>
-                  <option value="price-desc">Price: High to Low</option>
-                </select>
+              <div className="filters-wrapper">
+                <div className="category-filter">
+                  <span className="filter-label">Category:</span>
+                  <select 
+                    value={selectedCategory} 
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="filter-select"
+                  >
+                    {categories.map((cat, idx) => (
+                      <option key={idx} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="sort-by">
+                  <span className="filter-label">Sort by:</span>
+                  <select 
+                    value={sortOption} 
+                    onChange={(e) => setSortOption(e.target.value)}
+                    className="filter-select"
+                  >
+                    <option value="featured">Featured (Newest)</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -131,78 +165,105 @@ const Collections = () => {
                 <p>Try searching for a different keyword or category.</p>
               </div>
             ) : (
-              <div className="products-grid">
-                {displayedProducts.map((product) => {
-                  const isAddedToCart = cartItems?.some(item => item.product_id === product.id);
-                  return (
-                  <Link to={`/products/${product.id}`} key={product.id} className="product-card">
-                    <div className="product-image-container">
-                      {product.image_url ? (
-                        <img src={product.image_url} alt={product.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-                      ) : (
-                        <div className="placeholder-image">
-                          <span className="placeholder-icon">📦</span>
-                          <span className="placeholder-text">{product.name}</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="product-info-card">
-                      <span className="product-category">{product.category || 'WELLNESS'}</span>
-                      <h3 className="product-name" title={product.name}>{product.name}</h3>
-                      
-                      <div className="product-rating">
-                        <span className="stars">
-                          <span className="star-filled">★</span>
-                          <span className="star-filled">★</span>
-                          <span className="star-filled">★</span>
-                          <span className="star-filled">★</span>
-                          <span className="star-filled">★</span>
-                        </span>
-                        <span className="reviews-count">5.0</span>
-                      </div>
-
-                      {product.description && (
-                        <p className="product-desc" dangerouslySetInnerHTML={{ __html: product.description.substring(0, 80) + '...' }}></p>
-                      )}
-
-                      <div className="product-price-box">
-                        <div className="price-current">
-                          <span className="price-symbol">₹</span>
-                          <span className="price-amount">{Number(product.price).toLocaleString('en-IN')}</span>
-                        </div>
-                        {product.original_price && Number(product.original_price) > Number(product.price) && (
-                          <div className="price-original-row">
-                            <span className="mrp-label">M.R.P:</span>
-                            <span className="original-price">₹{Number(product.original_price).toLocaleString('en-IN')}</span>
-                            <span className="discount-badge">
-                              {Math.round(((product.original_price - product.price) / product.original_price) * 100)}% off
-                            </span>
+              <>
+                <div className="products-grid">
+                  {paginatedProducts.map((product) => {
+                    const isAddedToCart = cartItems?.some(item => item.product_id === product.id);
+                    return (
+                    <Link to={`/products/${product.id}`} key={product.id} className="product-card">
+                      <div className="product-image-container">
+                        {product.image_url ? (
+                          <img src={product.image_url} alt={product.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                        ) : (
+                          <div className="placeholder-image">
+                            <span className="placeholder-icon">📦</span>
+                            <span className="placeholder-text">{product.name}</span>
                           </div>
                         )}
                       </div>
-                      
-                      <button 
-                        className="btn-add-cart"
-                        disabled={isAddedToCart}
-                        onClick={(e) => {
-                          if (isAddedToCart) return;
-                          e.preventDefault();
-                          e.stopPropagation();
-                          // Get first size if available
-                          const sizeData = product.sizes && product.sizes.length > 0 ? product.sizes[0] : null;
-                          addToCart(product.id, 1, sizeData);
-                        }}
-                        style={{
-                          backgroundColor: isAddedToCart ? '#f5b041' : 'var(--color-primary-green)',
-                          cursor: isAddedToCart ? 'not-allowed' : 'pointer'
-                        }}
-                      >
-                        {isAddedToCart ? '✓ Added to cart' : 'Add to cart'}
-                      </button>
-                    </div>
-                  </Link>
-                )})}
-              </div>
+                      <div className="product-info-card">
+                        <span className="product-category">{product.category || 'WELLNESS'}</span>
+                        <h3 className="product-name" title={product.name}>{product.name}</h3>
+                        
+                        <div className="product-rating">
+                          <span className="stars">
+                            <span className="star-filled">★</span>
+                            <span className="star-filled">★</span>
+                            <span className="star-filled">★</span>
+                            <span className="star-filled">★</span>
+                            <span className="star-filled">★</span>
+                          </span>
+                          <span className="reviews-count">5.0</span>
+                        </div>
+
+                        {product.description && (
+                          <p className="product-desc" dangerouslySetInnerHTML={{ __html: product.description.substring(0, 80) + '...' }}></p>
+                        )}
+
+                        <div className="product-price-box">
+                          <div className="price-current">
+                            <span className="price-symbol">₹</span>
+                            <span className="price-amount">{Number(product.price).toLocaleString('en-IN')}</span>
+                          </div>
+                          {product.original_price && Number(product.original_price) > Number(product.price) && (
+                            <div className="price-original-row">
+                              <span className="mrp-label">M.R.P:</span>
+                              <span className="original-price">₹{Number(product.original_price).toLocaleString('en-IN')}</span>
+                              <span className="discount-badge">
+                                {Math.round(((product.original_price - product.price) / product.original_price) * 100)}% off
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <button 
+                          className="btn-add-cart"
+                          disabled={isAddedToCart}
+                          onClick={(e) => {
+                            if (isAddedToCart) return;
+                            e.preventDefault();
+                            e.stopPropagation();
+                            // Get first size if available
+                            const sizeData = product.sizes && product.sizes.length > 0 ? product.sizes[0] : null;
+                            addToCart(product.id, 1, sizeData);
+                          }}
+                          style={{
+                            backgroundColor: isAddedToCart ? '#f5b041' : 'var(--color-primary-green)',
+                            cursor: isAddedToCart ? 'not-allowed' : 'pointer'
+                          }}
+                        >
+                          {isAddedToCart ? '✓ Added to cart' : 'Add to cart'}
+                        </button>
+                      </div>
+                    </Link>
+                  )})}
+                </div>
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="pagination-controls" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', marginTop: '40px' }}>
+                    <button 
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: currentPage === 1 ? '#f1f5f9' : 'var(--color-primary-green)', color: currentPage === 1 ? '#94a3b8' : 'white', fontWeight: '600', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }}
+                    >
+                      Previous
+                    </button>
+                    
+                    <span style={{ fontWeight: '600', color: '#475569' }}>
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    
+                    <button 
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: currentPage === totalPages ? '#f1f5f9' : 'var(--color-primary-green)', color: currentPage === totalPages ? '#94a3b8' : 'white', fontWeight: '600', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }}
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}

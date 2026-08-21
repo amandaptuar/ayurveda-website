@@ -47,7 +47,6 @@ const ShopByConcern = () => {
 
   const currentProducts = allProducts
     .filter(p => (p.category || 'GENERAL WELLNESS') === activeTab)
-    .slice(0, 4) // Show up to 4 products per category tab
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -94,7 +93,7 @@ const ShopByConcern = () => {
             </div>
 
             {/* Product Grid */}
-            <div className="concern-products">
+            <div className="concern-products-scroll">
               {currentProducts.length > 0 ? (
                 currentProducts.map((product) => {
                   const isAddedToCart = cartItems?.some(item => item.product_id === product.id);

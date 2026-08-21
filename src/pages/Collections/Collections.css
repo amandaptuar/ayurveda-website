@@ -1,6 +1,7 @@
 .collections-page {
   background-color: #f7f9f7;
   min-height: calc(100vh - 150px);
+  overflow-x: hidden;
 }
 
 .collections-header {
@@ -18,71 +19,92 @@
   max-width: 1300px;
   margin: 0 auto;
   padding: 0 20px 60px;
+  overflow-x: hidden;
 }
 
 .filter-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
+  padding: 16px 20px;
   background-color: white;
-  border-radius: 8px;
+  border-radius: 12px;
   margin-bottom: 30px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  border: 1px solid #f1f5f9;
+  flex-wrap: wrap;
+  gap: 16px;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
-.btn-filter {
-  background: transparent;
-  border: none;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
+.search-filter {
+  flex: 1;
+  min-width: 250px;
+  position: relative;
+  max-width: 100%;
 }
 
-.filter-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.5;
 }
 
-.view-toggles {
-  display: flex;
-  gap: 5px;
-}
-
-.view-btn {
-  background: transparent;
-  border: none;
-  font-size: 1.2rem;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  padding: 4px;
-}
-
-.view-btn.active {
-  color: var(--color-text-primary);
-}
-
-.sort-by {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.9rem;
-  color: var(--color-text-primary);
-}
-
-.sort-by select {
-  border: none;
-  background: transparent;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  cursor: pointer;
+.search-input {
+  width: 100%;
+  padding: 12px 16px 12px 40px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
   outline: none;
+  font-size: 0.95rem;
+  background-color: #f8fafc;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.search-input:focus {
+  border-color: var(--color-primary-green);
+}
+
+.filters-wrapper {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.category-filter, .sort-by {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filter-label {
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.filter-select {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  outline: none;
+  cursor: pointer;
+  background-color: #f8fafc;
+  font-weight: 500;
+  color: #334155;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.filter-select:focus {
+  border-color: var(--color-primary-green);
 }
 
 /* Products Grid */
@@ -286,6 +308,10 @@
 }
 
 @media (max-width: 768px) {
+  .collections-container {
+    padding: 0 12px 60px;
+  }
+
   .products-grid {
     grid-template-columns: 1fr !important;
   }
@@ -296,12 +322,58 @@
   
   .filter-bar {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
   
-  .filter-right {
+  .search-filter {
+    min-width: unset !important;
     width: 100%;
-    justify-content: space-between;
+  }
+
+  .search-input {
+    width: 100%;
+    font-size: 0.9rem;
+    padding: 10px 14px 10px 36px;
+  }
+
+  .filters-wrapper {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+  
+  .category-filter, .sort-by {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+
+  .filter-label {
+    font-size: 0.8rem;
+    min-width: 70px;
+    flex-shrink: 0;
+  }
+
+  .filter-select {
+    flex: 1;
+    width: 100%;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    box-sizing: border-box !important;
+  }
+
+  .collections-header {
+    padding: 24px 16px;
+  }
+
+  .collections-header h1 {
+    font-size: 1.6rem;
   }
 }

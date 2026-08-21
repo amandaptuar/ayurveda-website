@@ -1,4 +1,5 @@
 import React, { useRef } from 'react'
+import { Link } from 'react-router-dom'
 import './WatchAndShop.css'
 
 const WatchAndShop = () => {
@@ -13,8 +14,6 @@ const WatchAndShop = () => {
     { name: 'She Care Juice', price: 541, originalPrice: 543, views: '18.0K', image: '/home-page-img/2677ab69-59a4-4ce9-812b-3c9bc6426636.jpg' },
   ]
 
-
-
   return (
     <section className="watch-shop">
       <div className="container">
@@ -22,11 +21,13 @@ const WatchAndShop = () => {
 
           <div className="watch-shop-scroll" ref={scrollRef}>
             {videos.map((video, index) => (
-              <div key={index} className="watch-card">
-                <div className="watch-video">
-                  <img src={video.image} alt="Video thumbnail" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+              <Link to="/collections/all" key={index} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div className="watch-card">
+                  <div className="watch-video">
+                    <img src={video.image} alt="Video thumbnail" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

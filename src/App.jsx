@@ -15,6 +15,9 @@ import OrderSuccess from './pages/OrderSuccess/OrderSuccess'
 import Profile from './pages/Profile/Profile'
 import TermsAndConditions from './pages/TermsAndConditions/TermsAndConditions'
 import PrivacyPolicy from './pages/PrivacyPolicy/PrivacyPolicy'
+import Disclaimer from './pages/Disclaimer/Disclaimer'
+import RefundPolicy from './pages/RefundPolicy/RefundPolicy'
+import ShippingPolicy from './pages/ShippingPolicy/ShippingPolicy'
 import logoImg from './assets/image.png'
 
 // Admin Pages
@@ -109,6 +112,9 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/disclaimer" element={<Disclaimer />} />
+          <Route path="/refund-policy" element={<RefundPolicy />} />
+          <Route path="/shipping-policy" element={<ShippingPolicy />} />
         </Route>
         
         <Route path="/admin" element={<AdminLayout />}>
