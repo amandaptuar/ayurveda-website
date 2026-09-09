@@ -23,7 +23,7 @@ const Collections = () => {
         .from('products')
         .select('*')
         .eq('status', 'active')
-        .order('created_at', { ascending: false })
+        .order('name', { ascending: true })
       
       if (error) throw error
       setProducts(data || [])
@@ -35,7 +35,7 @@ const Collections = () => {
   }
 
   const [searchQuery, setSearchQuery] = useState(initialSearch)
-  const [sortOption, setSortOption] = useState('featured')
+  const [sortOption, setSortOption] = useState('name-asc')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [currentPage, setCurrentPage] = useState(1)
   const productsPerPage = 12
@@ -69,7 +69,11 @@ const Collections = () => {
     return matchesSearch && matchesCategory
   })
 
-  if (sortOption === 'price-asc') {
+  if (sortOption === 'name-asc') {
+    displayedProducts.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+  } else if (sortOption === 'name-desc') {
+    displayedProducts.sort((a, b) => (b.name || '').localeCompare(a.name || ''))
+  } else if (sortOption === 'price-asc') {
     displayedProducts.sort((a, b) => Number(a.price || 0) - Number(b.price || 0))
   } else if (sortOption === 'price-desc') {
     displayedProducts.sort((a, b) => Number(b.price || 0) - Number(a.price || 0))
@@ -151,7 +155,8 @@ const Collections = () => {
                     onChange={(e) => setSortOption(e.target.value)}
                     className="filter-select"
                   >
-                    <option value="featured">Featured (Newest)</option>
+                    <option value="name-asc">Name: A to Z</option>
+                    <option value="name-desc">Name: Z to A</option>
                     <option value="price-asc">Price: Low to High</option>
                     <option value="price-desc">Price: High to Low</option>
                   </select>

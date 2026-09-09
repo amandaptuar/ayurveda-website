@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useCart } from '../../context/CartContext'
+import GetMoreCard from '../GetMoreCard/GetMoreCard'
 import './ComboDeals.css'
 
 const ComboDeals = () => {
@@ -43,7 +44,7 @@ const ComboDeals = () => {
             </h2>
             <p className="section-subtitle">Better together — save more</p>
           </div>
-          <Link to="/collections/combos">
+          <Link to="/collections/all">
             <button className="view-all-btn">View All →</button>
           </Link>
         </div>
@@ -54,7 +55,7 @@ const ComboDeals = () => {
             <p>Check back later or browse our admin panel to add some.</p>
           </div>
         ) : (
-          <div className="combo-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+          <div className="combo-scroll-grid">
             {combos.map((combo) => {
               const isAddedToCart = cartItems?.some(item => item.product_id === combo.id);
               return (
@@ -116,6 +117,7 @@ const ComboDeals = () => {
                 </div>
               </div>
             )})}
+            <GetMoreCard linkTo="/collections/all" label="Get More" />
           </div>
         )}
       </div>
@@ -124,3 +126,4 @@ const ComboDeals = () => {
 }
 
 export default ComboDeals
+

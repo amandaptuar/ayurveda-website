@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useCart } from '../../context/CartContext'
+import GetMoreCard from '../GetMoreCard/GetMoreCard'
 import './ShopByConcern.css'
 
 const ShopByConcern = () => {
@@ -95,69 +96,72 @@ const ShopByConcern = () => {
             {/* Product Grid */}
             <div className="concern-products-scroll">
               {currentProducts.length > 0 ? (
-                currentProducts.map((product) => {
-                  const isAddedToCart = cartItems?.some(item => item.product_id === product.id);
-                  return (
-                  <div className="product-card" key={product.id}>
-                    <Link to={`/products/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <div className="product-image-container">
-                        {product.is_bestseller && (
-                          <span className="badge-bestseller">✦ Bestseller</span>
-                        )}
-                        {product.image_url ? (
-                          <img src={product.image_url} alt={product.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-                        ) : (
-                          <div className="placeholder-image">
-                            <span className="placeholder-icon">📦</span>
-                            <span className="placeholder-text">{product.name}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="product-info-card">
-                        <span className="product-category">{product.category || 'WELLNESS'}</span>
-                        <h3 className="product-name">{product.name}</h3>
-                        
-                        <div className="product-rating" style={{ display: 'flex', alignItems: 'center', gap: '4px', margin: '4px 0 8px' }}>
-                          <span className="stars" style={{ color: '#f5a623', fontSize: '0.9rem' }}>
-                            ★★★★★
-                          </span>
-                          <span className="reviews-count" style={{ fontSize: '0.8rem', color: '#64748b' }}>(4.5)</span>
-                        </div>
-
-                        <div className="product-price-box">
-                          <div className="price-current">
-                            <span className="price-symbol">₹</span>
-                            <span className="price-amount">{Number(product.price).toLocaleString('en-IN')}</span>
-                          </div>
-                          {product.original_price && Number(product.original_price) > Number(product.price) && (
-                            <div className="price-original-row">
-                              <span className="mrp-label">M.R.P:</span>
-                              <span className="original-price">₹{Number(product.original_price).toLocaleString('en-IN')}</span>
-                              <span className="discount-badge">
-                                {Math.round(((product.original_price - product.price) / product.original_price) * 100)}% off
-                              </span>
+                <>
+                  {currentProducts.map((product) => {
+                    const isAddedToCart = cartItems?.some(item => item.product_id === product.id);
+                    return (
+                    <div className="product-card" key={product.id}>
+                      <Link to={`/products/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <div className="product-image-container">
+                          {product.is_bestseller && (
+                            <span className="badge-bestseller">✦ Bestseller</span>
+                          )}
+                          {product.image_url ? (
+                            <img src={product.image_url} alt={product.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                          ) : (
+                            <div className="placeholder-image">
+                              <span className="placeholder-icon">📦</span>
+                              <span className="placeholder-text">{product.name}</span>
                             </div>
                           )}
                         </div>
+                        <div className="product-info-card">
+                          <span className="product-category">{product.category || 'WELLNESS'}</span>
+                          <h3 className="product-name">{product.name}</h3>
+                          
+                          <div className="product-rating" style={{ display: 'flex', alignItems: 'center', gap: '4px', margin: '4px 0 8px' }}>
+                            <span className="stars" style={{ color: '#f5a623', fontSize: '0.9rem' }}>
+                              ★★★★★
+                            </span>
+                            <span className="reviews-count" style={{ fontSize: '0.8rem', color: '#64748b' }}>(4.5)</span>
+                          </div>
+
+                          <div className="product-price-box">
+                            <div className="price-current">
+                              <span className="price-symbol">₹</span>
+                              <span className="price-amount">{Number(product.price).toLocaleString('en-IN')}</span>
+                            </div>
+                            {product.original_price && Number(product.original_price) > Number(product.price) && (
+                              <div className="price-original-row">
+                                <span className="mrp-label">M.R.P:</span>
+                                <span className="original-price">₹{Number(product.original_price).toLocaleString('en-IN')}</span>
+                                <span className="discount-badge">
+                                  {Math.round(((product.original_price - product.price) / product.original_price) * 100)}% off
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </Link>
+                      <div style={{ padding: '0 16px 16px' }}>
+                        <button 
+                          className="btn-add-cart"
+                          disabled={isAddedToCart}
+                          onClick={(e) => {
+                            if (isAddedToCart) return;
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const sizeData = product.sizes && product.sizes.length > 0 ? product.sizes[0] : null;
+                            addToCart(product.id, 1, sizeData);
+                          }}
+                        >
+                          {isAddedToCart ? '✓ Added to cart' : 'Add to cart'}
+                        </button>
                       </div>
-                    </Link>
-                    <div style={{ padding: '0 16px 16px' }}>
-                      <button 
-                        className="btn-add-cart"
-                        disabled={isAddedToCart}
-                        onClick={(e) => {
-                          if (isAddedToCart) return;
-                          e.preventDefault();
-                          e.stopPropagation();
-                          const sizeData = product.sizes && product.sizes.length > 0 ? product.sizes[0] : null;
-                          addToCart(product.id, 1, sizeData);
-                        }}
-                      >
-                        {isAddedToCart ? '✓ Added to cart' : 'Add to cart'}
-                      </button>
                     </div>
-                  </div>
-                )})
+                  )})}
+                  <GetMoreCard linkTo="/collections/all" label="Get More" />
+                </>
               ) : (
                 <div style={{ textAlign: 'center', gridColumn: '1 / -1', padding: '60px 20px', backgroundColor: '#f8fafc', borderRadius: '16px', color: '#64748b' }}>
                   <h3>No products found for this concern!</h3>

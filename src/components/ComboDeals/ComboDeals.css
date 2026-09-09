@@ -9,6 +9,27 @@
   gap: 18px;
 }
 
+.combo-scroll-grid {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding-bottom: 10px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.combo-scroll-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.combo-scroll-grid > .product-card {
+  min-width: 280px;
+  width: 280px;
+  flex: 0 0 auto;
+}
+
 .combo-card {
   display: flex;
   align-items: center;

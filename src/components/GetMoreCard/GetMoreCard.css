@@ -1,0 +1,114 @@
+.get-more-card {
+  min-width: 200px;
+  width: 200px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg, 16px);
+  background: linear-gradient(135deg, #1a5d3a 0%, #2d8a5e 50%, #38a169 100%);
+  text-decoration: none;
+  color: white;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  min-height: 280px;
+}
+
+.get-more-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.get-more-card:hover::before {
+  opacity: 1;
+}
+
+.get-more-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(26, 93, 58, 0.35);
+}
+
+.get-more-card:hover .get-more-arrow {
+  transform: translateX(4px);
+}
+
+.get-more-card:hover .get-more-icon-wrapper {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.get-more-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+  padding: 24px 16px;
+}
+
+.get-more-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+.get-more-arrow {
+  width: 26px;
+  height: 26px;
+  transition: transform 0.3s ease;
+}
+
+.get-more-label {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.get-more-sublabel {
+  font-size: 0.78rem;
+  font-weight: 400;
+  opacity: 0.8;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 768px) {
+  .get-more-card {
+    min-width: 160px;
+    width: 160px;
+    min-height: 220px;
+  }
+
+  .get-more-icon-wrapper {
+    width: 48px;
+    height: 48px;
+  }
+
+  .get-more-arrow {
+    width: 22px;
+    height: 22px;
+  }
+
+  .get-more-label {
+    font-size: 0.95rem;
+  }
+
+  .get-more-sublabel {
+    font-size: 0.72rem;
+  }
+}

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useCart } from '../../context/CartContext'
+import GetMoreCard from '../GetMoreCard/GetMoreCard'
 import './Bestsellers.css'
 
 const Bestsellers = () => {
@@ -122,6 +123,7 @@ const Bestsellers = () => {
                 </div>
               </div>
             )})}
+            <GetMoreCard linkTo="/collections/all" label="Get More" />
           </div>
         )}
 

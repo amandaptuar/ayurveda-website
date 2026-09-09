@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import './HeroBanner.css'
 
 const HeroBanner = () => {
@@ -72,9 +73,9 @@ const HeroBanner = () => {
             key={index}
             className={`hero-slide ${index === currentSlide ? 'active' : ''}`}
           >
-            <div className="hero-slide-inner">
+            <Link to="/collections/all" className="hero-slide-inner" style={{ display: 'block', cursor: 'pointer' }}>
               <img src={slide.image} alt={slide.title} className="hero-full-image" />
-            </div>
+            </Link>
           </div>
         ))}
       </div>
