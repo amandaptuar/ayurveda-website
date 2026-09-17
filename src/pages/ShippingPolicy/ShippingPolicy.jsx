@@ -19,7 +19,7 @@ const ShippingPolicy = () => {
 
           <section className="policy-section">
             <h2>2. Domestic Shipping Rates and Estimates</h2>
-            <p>Shipping charges for your order will be calculated and displayed at checkout. We offer Free Delivery on all orders above ₹399. For orders below ₹399, a standard delivery fee will apply.</p>
+            <p>Shipping charges for your order will be calculated and displayed at checkout. We offer Free Delivery on all orders of ₹399 and above. For orders below ₹399, a standard delivery fee will apply.</p>
             <p>Estimated delivery time within India is generally 3-7 business days depending on the destination state and pin code.</p>
           </section>
 

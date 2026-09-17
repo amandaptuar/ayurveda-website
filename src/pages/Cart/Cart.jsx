@@ -15,7 +15,7 @@ const Cart = () => {
   const navigate = useNavigate()
 
   const subtotal = cartTotal
-  const shipping = subtotal > 399 || subtotal === 0 ? 0 : 60
+  const shipping = subtotal >= 399 || subtotal === 0 ? 0 : 60
 
   let discount = 0
   if (appliedCoupon) {

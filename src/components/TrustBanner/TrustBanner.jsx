@@ -5,7 +5,7 @@ const TrustBanner = () => {
   const items = [
     { icon: '🔒', title: 'Secure Payments', subtitle: 'UPI, cards & COD available' },
     { icon: '✅', title: 'Pure Herbs', subtitle: 'with No Extract' },
-    { icon: '🚚', title: 'Free Delivery', subtitle: 'On all orders above ₹399' },
+    { icon: '🚚', title: 'Free Delivery', subtitle: 'On all orders ₹399 & above' },
   ]
 
   // Double the items for seamless infinite scroll

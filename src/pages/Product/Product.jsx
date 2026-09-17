@@ -220,7 +220,7 @@ const Product = () => {
           <div className="offers-strip">
             <div className="offer-item">
               <span className="offer-icon">🚚</span>
-              <span>Free Delivery on orders above ₹399</span>
+              <span>Free Delivery on orders ₹399 & above</span>
             </div>
             <div className="offer-item">
               <span className="offer-icon">⚡</span>
