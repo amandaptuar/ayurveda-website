@@ -27,6 +27,7 @@ import Dashboard from './pages/Admin/Dashboard'
 import ProductsManager from './pages/Admin/ProductsManager'
 import OrdersManager from './pages/Admin/OrdersManager'
 import CouponsManager from './pages/Admin/CouponsManager'
+import ReviewsManager from './pages/Admin/ReviewsManager'
 
 const StoreLayout = () => {
   const location = useLocation();
@@ -131,6 +132,7 @@ function App() {
           <Route path="products" element={<ProductsManager />} />
           <Route path="orders" element={<OrdersManager />} />
           <Route path="coupons" element={<CouponsManager />} />
+          <Route path="reviews" element={<ReviewsManager />} />
         </Route>
       </Routes>
     </div>

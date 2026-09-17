@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { toast } from 'react-hot-toast';
-import { ShoppingCart, Package } from 'lucide-react';
+import { ShoppingCart, Package, ExternalLink, Edit3, Plus, Truck, Check, X } from 'lucide-react';
+import { createShadowfaxOrder, cancelShadowfaxOrder } from '../../services/shadowfaxService';
 
 const OrdersManager = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState('');
+  const [editingAwbId, setEditingAwbId] = useState(null);
+  const [editingAwbText, setEditingAwbText] = useState('');
 
   useEffect(() => {
     fetchOrders();
@@ -40,11 +43,45 @@ const OrdersManager = () => {
     }
   };
 
-  const updateOrderStatus = async (orderId, newStatus) => {
+  const saveAwbNumber = async (orderId) => {
     try {
+      const cleanAwb = editingAwbText.trim();
       const { error } = await supabase
         .from('orders')
-        .update({ status: newStatus })
+        .update({ tracking_number: cleanAwb || null })
+        .eq('id', orderId);
+
+      if (error) throw error;
+      toast.success('Shadowfax AWB Tracking Number updated!');
+      setEditingAwbId(null);
+      fetchOrders();
+    } catch (err) {
+      toast.error('Failed to update AWB Number');
+      console.error(err);
+    }
+  };
+
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      const targetOrder = orders.find(o => o.id === orderId);
+      let updatePayload = { status: newStatus };
+
+      // Trigger Shadowfax Cancellation API if order is cancelled by Admin
+      if (newStatus === 'cancelled' && targetOrder && targetOrder.tracking_number) {
+        await cancelShadowfaxOrder(targetOrder, 'Cancelled by Admin');
+      }
+
+      // If status shipped and has API response, attach AWB
+      if (newStatus === 'shipped' && targetOrder && !targetOrder.tracking_number) {
+        const sfResult = await createShadowfaxOrder(targetOrder);
+        if (sfResult.success && sfResult.awbNumber) {
+          updatePayload.tracking_number = sfResult.awbNumber;
+        }
+      }
+
+      const { error } = await supabase
+        .from('orders')
+        .update(updatePayload)
         .eq('id', orderId);
 
       if (error) throw error;
@@ -95,6 +132,7 @@ const OrdersManager = () => {
               <tr>
                 <th>Order ID & Date</th>
                 <th>Customer</th>
+                <th>Shadowfax AWB</th>
                 <th>Items Ordered</th>
                 <th>Total Amount</th>
                 <th>Status</th>
@@ -103,31 +141,26 @@ const OrdersManager = () => {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan="6" style={{textAlign: 'center', padding: '40px'}}>Loading orders...</td></tr>
-              ) : filteredOrders.map((order) => (
+                <tr><td colSpan="7" style={{textAlign: 'center', padding: '40px'}}>Loading orders...</td></tr>
+              ) : filteredOrders.map((order) => {
+                const awbCode = order.tracking_number || `SFX-${order.id.replace(/-/g, '').slice(0, 10).toUpperCase()}`;
+                return (
                 <tr key={order.id}>
                   <td>
-                    <div style={{ fontWeight: '600', color: 'var(--admin-text-primary)' }}>
-                      #{order.id.split('-')[0].toUpperCase()}
+                    <div style={{ fontWeight: '700', color: 'var(--admin-text-primary)', wordBreak: 'break-all', fontFamily: 'monospace', fontSize: '0.9rem' }}>
+                      #{order.id.toUpperCase()}
                     </div>
                     <div style={{ fontSize: '0.85rem', color: 'var(--admin-text-secondary)', marginTop: '4px' }}>
                       {new Date(order.created_at).toLocaleString()}
                     </div>
-                    {order.status !== 'cancelled' && order.status !== 'delivered' && (
-                      <div style={{ fontSize: '0.85rem', color: '#16a34a', marginTop: '4px', fontWeight: '600' }}>
-                        Expected: {new Date(new Date(order.created_at).getTime() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                      </div>
-                    )}
                   </td>
                   <td>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <span style={{ fontWeight: '600' }}>{order.customer_name || 'Unknown Name'}</span>
                       {order.profiles?.email && (
-                        <span style={{ fontSize: '0.85rem', color: 'var(--admin-text-secondary)' }}>
-                          📧 {order.profiles.email}
-                        </span>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--admin-text-secondary)' }}>📧 {order.profiles.email}</span>
                       )}
-                      {order.customer_phone && <span style={{ fontSize: '0.85rem', color: 'var(--admin-text-secondary)' }}>📞 {order.customer_phone}</span>}
+                      {order.customer_phone && <span style={{ fontSize: '0.8rem', color: 'var(--admin-text-secondary)' }}>📞 {order.customer_phone}</span>}
                       
                       {order.shipping_address && (
                         <div style={{ marginTop: '4px', fontSize: '0.8rem', color: 'var(--admin-text-secondary)', background: '#f1f5f9', padding: '6px', borderRadius: '4px', lineHeight: '1.4' }}>
@@ -136,6 +169,163 @@ const OrdersManager = () => {
                         </div>
                       )}
                     </div>
+                  </td>
+                  <td>
+                    {editingAwbId === order.id ? (
+                      <div style={{
+                        background: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '10px',
+                        padding: '10px',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                        minWidth: '180px'
+                      }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#475569', marginBottom: '6px' }}>
+                          ENTER SHADOWFAX AWB
+                        </div>
+                        <input
+                          type="text"
+                          value={editingAwbText}
+                          onChange={(e) => setEditingAwbText(e.target.value)}
+                          placeholder="e.g. SFX10293847"
+                          style={{
+                            width: '100%',
+                            padding: '6px 10px',
+                            borderRadius: '6px',
+                            border: '1px solid #2563eb',
+                            fontSize: '0.85rem',
+                            fontFamily: 'monospace',
+                            outline: 'none',
+                            marginBottom: '8px'
+                          }}
+                          autoFocus
+                        />
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <button
+                            onClick={() => saveAwbNumber(order.id)}
+                            style={{
+                              flex: 1,
+                              background: '#2563eb',
+                              color: 'white',
+                              border: 'none',
+                              padding: '6px',
+                              borderRadius: '6px',
+                              fontSize: '0.75rem',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            <Check size={13} /> Save
+                          </button>
+                          <button
+                            onClick={() => setEditingAwbId(null)}
+                            style={{
+                              background: '#f1f5f9',
+                              color: '#64748b',
+                              border: '1px solid #cbd5e1',
+                              padding: '6px 10px',
+                              borderRadius: '6px',
+                              fontSize: '0.75rem',
+                              fontWeight: '600',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', minWidth: '170px' }}>
+                        {order.tracking_number ? (
+                          <div style={{
+                            background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+                            border: '1px solid #bbf7d0',
+                            borderRadius: '10px',
+                            padding: '8px 12px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '6px'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <span style={{ fontSize: '0.7rem', fontWeight: '800', color: '#15803d', letterSpacing: '0.5px' }}>
+                                ⚡ SHADOWFAX
+                              </span>
+                              <button
+                                onClick={() => {
+                                  setEditingAwbId(order.id);
+                                  setEditingAwbText(order.tracking_number || '');
+                                }}
+                                style={{ background: 'transparent', border: 'none', color: '#166534', cursor: 'pointer', padding: '0' }}
+                                title="Edit AWB Number"
+                              >
+                                <Edit3 size={13} />
+                              </button>
+                            </div>
+                            <span style={{ fontFamily: 'monospace', fontWeight: '800', color: '#0f172a', fontSize: '0.9rem', letterSpacing: '0.5px' }}>
+                              {order.tracking_number}
+                            </span>
+                            <a 
+                              href={`https://tracker.shadowfax.in/track?awb=${order.tracking_number}`} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                fontSize: '0.75rem',
+                                fontWeight: '700',
+                                color: '#15803d',
+                                textDecoration: 'none',
+                                marginTop: '2px'
+                              }}
+                            >
+                              Track Live <ExternalLink size={12} />
+                            </a>
+                          </div>
+                        ) : (
+                          <div style={{
+                            background: '#f8fafc',
+                            border: '1px dashed #cbd5e1',
+                            borderRadius: '10px',
+                            padding: '10px 12px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '6px',
+                            alignItems: 'flex-start'
+                          }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <Truck size={14} /> Unassigned AWB
+                            </span>
+                            <button
+                              onClick={() => {
+                                setEditingAwbId(order.id);
+                                setEditingAwbText('');
+                              }}
+                              style={{
+                                background: '#2563eb',
+                                color: 'white',
+                                border: 'none',
+                                padding: '5px 10px',
+                                borderRadius: '6px',
+                                fontSize: '0.75rem',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                marginTop: '2px'
+                              }}
+                            >
+                              <Plus size={13} /> Set AWB Number
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </td>
                   <td>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -183,7 +373,8 @@ const OrdersManager = () => {
                     </select>
                   </td>
                 </tr>
-              ))}
+              );
+            })}
               {!loading && filteredOrders.length === 0 && (
                 <tr>
                   <td colSpan="6" style={{ textAlign: 'center', padding: '48px', color: 'var(--admin-text-secondary)' }}>

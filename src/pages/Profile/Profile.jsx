@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../lib/supabase'
-import { Mail, MapPin } from 'lucide-react'
+import { Mail, MapPin, Truck } from 'lucide-react'
+import { toast } from 'react-hot-toast'
+import { trackShadowfaxShipment, cancelShadowfaxOrder } from '../../services/shadowfaxService'
 import './Profile.css'
 
 const Profile = () => {
@@ -82,6 +84,8 @@ const Profile = () => {
   const handleCancelOrder = async (orderId) => {
     if (window.confirm('Are you sure you want to cancel this order?')) {
       try {
+        const targetOrder = orders.find(o => o.id === orderId);
+
         const { error } = await supabase
           .from('orders')
           .update({ status: 'cancelled' })
@@ -89,11 +93,16 @@ const Profile = () => {
           
         if (error) throw error;
         
-        alert('Order cancelled successfully.');
+        if (targetOrder) {
+          // Trigger Shadowfax Order Cancellation Notification API
+          await cancelShadowfaxOrder(targetOrder, 'Cancelled by Customer');
+        }
+
+        toast.success('Order cancelled & Shadowfax notified.');
         fetchProfileData();
       } catch (error) {
         console.error('Error cancelling order:', error);
-        alert('Failed to cancel order. Please try again.');
+        toast.error('Failed to cancel order. Please try again.');
       }
     }
   };
@@ -106,6 +115,17 @@ const Profile = () => {
   }
 
   if (!user) return null
+
+  const handleCheckLiveShadowfax = async (awb) => {
+    toast.loading(`Connecting to Shadowfax API...`, { id: 'sf-track' })
+    const result = await trackShadowfaxShipment(awb)
+    if (result.success) {
+      const statusText = result.data?.status || (result.simulated ? 'In Transit (Hub)' : 'Active')
+      toast.success(`Shadowfax Live Status: ${statusText}`, { id: 'sf-track' })
+    } else {
+      toast.error(result.message || 'Unable to fetch Shadowfax live status', { id: 'sf-track' })
+    }
+  }
 
   return (
     <div className="profile-page">
@@ -210,7 +230,7 @@ const Profile = () => {
                         <div key={order.id} className="order-card">
                           <div className="order-card-header">
                             <div className="order-id-group">
-                              <span className="order-id">#{order.id.split('-')[0].toUpperCase()}</span>
+                              <span className="order-id">#{order.id.toUpperCase()}</span>
                               <span className="order-date">{new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                             </div>
                             <div className={`order-status status-${order.status || 'pending'}`} style={{
@@ -246,35 +266,63 @@ const Profile = () => {
                             </div>
                           ) : (
                             <div className="order-tracking-container">
-                              <div className="expected-delivery">
-                                {order.status === 'delivered' ? 'Delivered on ' : 'Arriving '}
-                                <span>
-                                  {new Date(new Date(order.created_at).getTime() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-                                </span>
-                              </div>
-                              
-                              <div className="tracking-timeline">
-                                <div className="tracking-progress-bar" style={{ 
-                                  width: order.status === 'delivered' ? '100%' : 
-                                         order.status === 'shipped' ? '66%' : 
-                                         order.status === 'confirmed' ? '33%' : '0%' 
-                                }}></div>
-                                
-                                <div className={`tracking-step ${order.status !== 'cancelled' ? 'active' : ''}`}>
-                                  <div className="step-dot"></div>
-                                  <span className="step-label">Ordered</span>
+                              <div className="shadowfax-tracking-card">
+                                <div className="shadowfax-tracking-header">
+                                  <div className="shadowfax-partner-badge">
+                                    <span>⚡ Shadowfax Express Delivery</span>
+                                  </div>
+                                  <div className="shadowfax-awb-info">
+                                    AWB: <span className="shadowfax-awb-code">{order.tracking_number || 'Awaiting Dispatch'}</span>
+                                  </div>
                                 </div>
-                                <div className={`tracking-step ${['confirmed', 'shipped', 'delivered'].includes(order.status) ? 'active' : ''}`}>
-                                  <div className="step-dot"></div>
-                                  <span className="step-label">Processing</span>
-                                </div>
-                                <div className={`tracking-step ${['shipped', 'delivered'].includes(order.status) ? 'active' : ''}`}>
-                                  <div className="step-dot"></div>
-                                  <span className="step-label">Shipped</span>
-                                </div>
-                                <div className={`tracking-step ${order.status === 'delivered' ? 'active' : ''}`}>
-                                  <div className="step-dot"></div>
-                                  <span className="step-label">Delivered</span>
+
+                                <div className="shadowfax-live-status-box">
+                                  <div className="shadowfax-status-details">
+                                    <div className="shadowfax-status-title">
+                                      {order.status === 'delivered' ? '📦 Delivered via Shadowfax' :
+                                       order.status === 'shipped' ? '🚚 In Transit (Shadowfax Express)' :
+                                       order.status === 'confirmed' ? '📋 Pickup Scheduled (Shadowfax)' :
+                                       '⏳ Order Processing'}
+                                    </div>
+                                    <div className="shadowfax-status-sub">
+                                      {order.status === 'delivered' 
+                                        ? 'Handed over to customer' 
+                                        : `Est. Delivery: ${new Date(new Date(order.created_at).getTime() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}`}
+                                    </div>
+                                  </div>
+
+                                  <div className="shadowfax-actions">
+                                    <button 
+                                      className="shadowfax-refresh-btn"
+                                      onClick={() => {
+                                        if (order.tracking_number) {
+                                          handleCheckLiveShadowfax(order.tracking_number)
+                                        } else {
+                                          toast('AWB number will be assigned once order is dispatched by store.', { icon: '📦' })
+                                        }
+                                      }}
+                                    >
+                                      Check Live Status
+                                    </button>
+                                    {order.tracking_number ? (
+                                      <a 
+                                        href={`https://tracker.shadowfax.in/track?awb=${order.tracking_number}`} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        className="shadowfax-track-btn"
+                                      >
+                                        Shadowfax Portal ↗
+                                      </a>
+                                    ) : (
+                                      <button 
+                                        className="shadowfax-track-btn" 
+                                        style={{ opacity: 0.7 }}
+                                        onClick={() => toast('Shadowfax tracking link will activate when dispatched.', { icon: 'ℹ️' })}
+                                      >
+                                        Shadowfax Portal ↗
+                                      </button>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </div>

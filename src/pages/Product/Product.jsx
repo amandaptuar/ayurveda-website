@@ -3,17 +3,30 @@ import { Helmet } from 'react-helmet-async'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useCart } from '../../context/CartContext'
+import { useAuth } from '../../context/AuthContext'
+import { toast } from 'react-hot-toast'
+import { submitCustomerReview, fetchProductReviews } from '../../services/reviewService'
 import './Product.css'
 
 const Product = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [product, setProduct] = useState(null)
   const [relatedProducts, setRelatedProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [quantity, setQuantity] = useState(1)
   const [selectedSizeIndex, setSelectedSizeIndex] = useState(0)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
+
+  // Review & Feedback State
+  const [reviews, setReviews] = useState([])
+  const [showReviewForm, setShowReviewForm] = useState(false)
+  const [reviewName, setReviewName] = useState(user?.email ? user.email.split('@')[0] : '')
+  const [reviewEmail, setReviewEmail] = useState(user?.email || '')
+  const [reviewRating, setReviewRating] = useState(5)
+  const [reviewComment, setReviewComment] = useState('')
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false)
   
   const { addToCart, cartItems } = useCart()
 
@@ -48,11 +61,44 @@ const Product = () => {
         .limit(10)
         
       setRelatedProducts(relatedData || [])
-      
+      loadReviews(id)
     } catch (error) {
-      console.error('Error fetching product details:', error)
+      console.error("Error fetching product details:", error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadReviews = async (prodId) => {
+    const data = await fetchProductReviews(prodId)
+    setReviews(data || [])
+  }
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault()
+    if (!reviewComment.trim()) {
+      return toast.error('Please enter your review / feedback')
+    }
+
+    setIsSubmittingReview(true)
+    try {
+      await submitCustomerReview({
+        customer_name: reviewName || 'Verified Customer',
+        customer_email: reviewEmail || 'customer@example.com',
+        rating: reviewRating,
+        comment: reviewComment,
+        product_id: product?.id,
+        product_name: product?.name
+      })
+
+      toast.success('Thank you! Your review has been saved successfully.')
+      setReviewComment('')
+      setShowReviewForm(false)
+      loadReviews(product?.id)
+    } catch (err) {
+      toast.error('Failed to submit feedback')
+    } finally {
+      setIsSubmittingReview(false)
     }
   }
 
@@ -411,6 +457,119 @@ const Product = () => {
           </div>
         </div>
       )}
+      {/* Customer Reviews & Feedback */}
+      <div className="customer-reviews-section">
+        <div className="reviews-section-header">
+          <div>
+            <h2 className="reviews-section-title">Customer Reviews & Feedback</h2>
+            <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '4px' }}>
+              Read authentic feedback from verified customers or share your experience.
+            </p>
+          </div>
+          <button 
+            className="btn-write-review"
+            onClick={() => setShowReviewForm(prev => !prev)}
+          >
+            {showReviewForm ? '✕ Close Form' : '✍️ Write a Review'}
+          </button>
+        </div>
+
+        {/* Review Form */}
+        {showReviewForm && (
+          <form className="review-form-card" onSubmit={handleReviewSubmit}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '16px', color: '#0f172a' }}>
+              Leave Your Feedback
+            </h3>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontWeight: '600', marginBottom: '6px', fontSize: '0.85rem' }}>
+                Your Rating
+              </label>
+              <div className="review-star-picker">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span 
+                    key={star} 
+                    onClick={() => setReviewRating(star)}
+                    style={{ opacity: star <= reviewRating ? 1 : 0.3 }}
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+              <div>
+                <label style={{ display: 'block', fontWeight: '600', marginBottom: '6px', fontSize: '0.85rem' }}>Name</label>
+                <input 
+                  type="text" 
+                  value={reviewName}
+                  onChange={(e) => setReviewName(e.target.value)}
+                  placeholder="Your Name"
+                  required
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontWeight: '600', marginBottom: '6px', fontSize: '0.85rem' }}>Email</label>
+                <input 
+                  type="email" 
+                  value={reviewEmail}
+                  onChange={(e) => setReviewEmail(e.target.value)}
+                  placeholder="your.email@gmail.com"
+                  required
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontWeight: '600', marginBottom: '6px', fontSize: '0.85rem' }}>Feedback / Review Details</label>
+              <textarea 
+                rows="4"
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                placeholder="Share your experience with this product..."
+                required
+                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', resize: 'vertical' }}
+              />
+            </div>
+
+            <button 
+              type="submit" 
+              className="btn-write-review"
+              disabled={isSubmittingReview}
+            >
+              {isSubmittingReview ? 'Submitting...' : 'Submit Feedback'}
+            </button>
+          </form>
+        )}
+
+        {/* Reviews List */}
+        <div className="reviews-list-grid">
+          {reviews.map((rev) => (
+            <div key={rev.id} className="review-item-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span className="review-author">{rev.customer_name}</span>
+                <span className="review-date">
+                  {new Date(rev.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </span>
+              </div>
+              <div style={{ color: '#f59e0b', fontSize: '1.1rem', letterSpacing: '2px' }}>
+                {'★'.repeat(Number(rev.rating || 5))}
+                <span style={{ color: '#cbd5e1' }}>{'★'.repeat(5 - Number(rev.rating || 5))}</span>
+              </div>
+              <p className="review-comment">"{rev.comment}"</p>
+            </div>
+          ))}
+
+          {reviews.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: '#64748b', gridColumn: '1 / -1' }}>
+              No reviews yet for this product. Be the first to share your feedback!
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
